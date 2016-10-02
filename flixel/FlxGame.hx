@@ -854,6 +854,7 @@ class FlxGame extends Sprite
 	/**
 	 * Goes through the game state and draws all the game objects and special effects.
 	 */
+	@:allow(flixel.system.render.hardware)
 	private function draw():Void
 	{
 		if (!_state.visible || !_state.exists)

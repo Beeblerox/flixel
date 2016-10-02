@@ -64,7 +64,7 @@ class QuadBatch implements IFlxDestroyable
 	/**
 	 * Holds the vertices data (positions, uvs, colors)
 	 */
-	private var vertices:Float32Array;
+	private var vertices:ArrayBuffer;
 	
 	/**
 	 * View on the vertices as a Float32Array
@@ -111,7 +111,7 @@ class QuadBatch implements IFlxDestroyable
 		numBytes = size * BYTES_PER_ELEMENT * VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX;
 		numIndices = size * INDICES_PER_QUAD;
 		
-		vertices = new Float32Array(numBytes);
+		vertices = new ArrayBuffer(numBytes);
 		positions = new Float32Array(vertices);
 		colors = new UInt32Array(vertices);
 		indices = new UInt16Array(numIndices);
@@ -124,8 +124,8 @@ class QuadBatch implements IFlxDestroyable
 			indices[indexPos + 0] = index + 0;
 			indices[indexPos + 1] = index + 1;
 			indices[indexPos + 2] = index + 2;
-			indices[indexPos + 3] = index + 0;
-			indices[indexPos + 4] = index + 2;
+			indices[indexPos + 3] = index + 2;
+			indices[indexPos + 4] = index + 1;
 			indices[indexPos + 5] = index + 3;
 			
 			states[i] = new RenderState();
@@ -154,21 +154,23 @@ class QuadBatch implements IFlxDestroyable
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices, GL.STATIC_DRAW);
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, vertices, GL.DYNAMIC_DRAW);
+			GL.bufferData(GL.ARRAY_BUFFER, positions, GL.DYNAMIC_DRAW);
+		//	GL.bufferData(GL.ARRAY_BUFFER, vertices, GL.DYNAMIC_DRAW);
 		}
 	}
 	
-	private function begin(parent:DisplayObject, renderSession:RenderSession):Void
+	public function begin(parent:DisplayObject, renderSession:RenderSession):Void
 	{
+		setContext(renderSession.gl);
+		
 		this.parent = parent;
 		this.renderSession = renderSession;
-		this.gl = renderSession.gl;
 		this.renderer = cast renderSession.renderer;
 		
 		start();
 	}
 	
-	private function end():Void
+	public function end():Void
 	{
 		flush();
 	}
@@ -262,8 +264,6 @@ class QuadBatch implements IFlxDestroyable
 		positions[i + 17] = uvx2;
 		positions[i + 18] = uvy2;
 		
-		// TODO: continue from here...
-		
 		var r:Float = 1.0;
 		var g:Float = 1.0;
 		var b:Float = 1.0;
@@ -293,6 +293,9 @@ class QuadBatch implements IFlxDestroyable
 			return;
 		}
 		
+		// TODO: fix this...
+		shader = texturedTileShader;
+		
 		if (dirty)
 		{
 			dirty = false;
@@ -303,14 +306,18 @@ class QuadBatch implements IFlxDestroyable
 			// this is the same for each shader?
 			var stride:Int = ELEMENTS_PER_VERTEX * BYTES_PER_ELEMENT;
 			
-			GL.vertexAttribPointer(shader.data.aVertexPosition.index, 2, GL.FLOAT, false, stride, 0);
-			GL.vertexAttribPointer(shader.data.aTextureCoord.index, 2, GL.FLOAT, false, stride, 2 * 4);
+			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, stride, 0);
+			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, 2 * 4);
+			
+			// color attributes will be interpreted as unsigned bytes and normalized
+			GL.vertexAttribPointer(shader.data.aColor.index, 4, gl.UNSIGNED_BYTE, true, stride, 4 * 4);
 		}
 		
 		// upload the verts to the buffer  
 		if (currentBatchSize > 0.5 * size)
 		{
-			GL.bufferSubData(GL.ARRAY_BUFFER, 0, vertices);
+			GL.bufferSubData(GL.ARRAY_BUFFER, 0, positions);
+		//	GL.bufferSubData(GL.ARRAY_BUFFER, 0, vertices);
 		}
 		else
 		{
@@ -395,7 +402,7 @@ class QuadBatch implements IFlxDestroyable
 					shader = currentShader = nextShader;
 					
 					// set shader function???
-					this.renderSession.shaderManager.setShader(shader);
+					renderSession.shaderManager.setShader(shader);
 				}
 			}
 			
@@ -415,6 +422,8 @@ class QuadBatch implements IFlxDestroyable
 			return;
 		}
 		
+		trace("shader is null: " + (shader == null));
+		
 		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 		
 		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
@@ -432,12 +441,12 @@ class QuadBatch implements IFlxDestroyable
 		this.renderSession.drawCount++;
 	}
 	
-	private function start():Void
+	public function start():Void
 	{
 		dirty = true;
 	}
 	
-	private function stop():Void
+	public function stop():Void
 	{
 		flush();
 		
@@ -502,10 +511,20 @@ class RenderState implements IFlxDestroyable
 		this.blend = blend;
 		this.shader = shader;
 		
-		this.redOffset = color.redOffset / 255;
-		this.greenOffset = color.greenOffset / 255;
-		this.blueOffset = color.blueOffset / 255;
-		this.alphaOffset = color.alphaOffset / 255;
+		if (color != null)
+		{
+			this.redOffset = color.redOffset / 255;
+			this.greenOffset = color.greenOffset / 255;
+			this.blueOffset = color.blueOffset / 255;
+			this.alphaOffset = color.alphaOffset / 255;
+		}
+		else
+		{
+			this.redOffset = 0;
+			this.greenOffset = 0;
+			this.blueOffset = 0;
+			this.alphaOffset = 0;
+		}
 	}
 	
 	public function destroy():Void

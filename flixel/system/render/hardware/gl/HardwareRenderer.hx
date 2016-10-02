@@ -1,9 +1,12 @@
 package flixel.system.render.hardware.gl;
 
+import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.shaders.FlxColorShader;
 import flixel.graphics.shaders.FlxTexturedShader;
+import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import openfl.geom.ColorTransform;
@@ -50,11 +53,19 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	
 	private var _renderHelper:GLRenderHelper;
 	
+	// TODO: remove this var...
+	var testSprite:FlxSprite;
+	
+	public var batcher:QuadBatch;
+	
 	public function new(width:Int, height:Int)
 	{
 		super();
 		
-		var batcher:QuadBatch;
+		testSprite = new FlxSprite();
+		testSprite.makeGraphic(100, 200, FlxColor.RED);
+		
+		batcher = new QuadBatch();
 		
 		__width = width;
 		__height = height;
@@ -154,6 +165,12 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		// TODO: call FlxGame's draw() method from here
 		// TODO: every camera will have its own render texture where i will draw everthing onto and only then draw this texture on the screen
 		// TODO: sprites might have renderTarget property
+		
+		
+		
+	//	FlxG.game.draw();
+		
+		
 		
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
@@ -289,6 +306,11 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
+			
+			
+		batcher.begin(this, renderSession);
+		batcher.addQuad(testSprite.frame, new FlxMatrix());
+		batcher.end();
 	}
 	
 	private function get_renderHelper():GLRenderHelper
