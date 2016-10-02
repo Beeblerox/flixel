@@ -1,21 +1,28 @@
 package flixel.system.render.hardware.gl;
+
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.shaders.FlxTexturedShader;
+import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.GLRenderContext;
 import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl._internal.renderer.RenderSession;
+import openfl._internal.renderer.opengl.GLRenderer;
 import openfl.display.BlendMode;
+import openfl.display.DisplayObject;
 import openfl.display.Shader;
 import openfl.geom.ColorTransform;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
-import openfl.utils.ArrayBuffer;
+import lime.utils.ArrayBuffer;
+import openfl.utils.ArrayBufferView;
 import openfl.utils.Float32Array;
 
 /**
@@ -28,10 +35,14 @@ class QuadBatch implements IFlxDestroyable
 	public static inline var VERTICES_PER_QUAD:Int = 4;
 	public static inline var INDICES_PER_QUAD:Int = 6;
 	
+	private static var texturedTileShader:FlxTexturedShader;
+	
+	private static var uColorOffset:Array<Float> = [];
+	
 	/**
 	 * Number of elements per vertex in spritebatch.
 	 */
-	public static inline var ELEMENTS_PER_VERTEX(default, never):Int = 5;
+	public static inline var ELEMENTS_PER_VERTEX:Int = 5;
 	
 	public var roundPixels:Bool = false;
 	
@@ -43,7 +54,7 @@ class QuadBatch implements IFlxDestroyable
 	/**
 	 * The total number of bytes in our batch
 	 */
-	private var numVertices:Int; // TODO: rename it to something like numBytes...
+	private var numBytes:Int;
 	
 	/**
 	 * The total number of indices in our batch
@@ -53,7 +64,7 @@ class QuadBatch implements IFlxDestroyable
 	/**
 	 * Holds the vertices data (positions, uvs, colors)
 	 */
-	private var vertices:ArrayBuffer;
+	private var vertices:Float32Array;
 	
 	/**
 	 * View on the vertices as a Float32Array
@@ -72,41 +83,41 @@ class QuadBatch implements IFlxDestroyable
 	
 	private var lastIndexCount:Int = 0;
 	
-	private var drawing:Bool = false;
-	
 	private var currentBatchSize:Int = 0;
 	
 	private var currentBaseTexture:FlxGraphic;
 	
 	private var dirty:Bool = true;
 	
-	private var textures:Array<FlxGraphic> = [];
-	
-	private var blendModes:Array<BlendMode> = [];
-	
-	private var shaders:Array<Shader> = [];
-	
-	private var gl:GLRenderContext;
+	private var states:Array<RenderState> = [];
 	
 	private var vertexBuffer:GLBuffer;
 	private var indexBuffer:GLBuffer;
 	
 	private var renderSession:RenderSession;
 	
+	private var parent:DisplayObject;
+	
+	private var gl:GLRenderContext;
+	
+	private var renderer:GLRenderer;
+	
+	private var shader:FlxShader;
+	
 	public function new(size:Int = 2000) 
 	{
 		this.size = size;
 		
-		numVertices = size * BYTES_PER_ELEMENT * VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX;
+		numBytes = size * BYTES_PER_ELEMENT * VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX;
 		numIndices = size * INDICES_PER_QUAD;
 		
-		vertices = new ArrayBuffer(numVertices);
+		vertices = new Float32Array(numBytes);
 		positions = new Float32Array(vertices);
 		colors = new UInt32Array(vertices);
 		indices = new UInt16Array(numIndices);
 		
 		var indexPos:Int, index:Int;
-		for (i in 0...size) //, j=0; i < numIndices; i += 6, j += 4)
+		for (i in 0...size)
 		{
 			indexPos = i * INDICES_PER_QUAD;
 			index = i * VERTICES_PER_QUAD;
@@ -116,6 +127,13 @@ class QuadBatch implements IFlxDestroyable
 			indices[indexPos + 3] = index + 0;
 			indices[indexPos + 4] = index + 2;
 			indices[indexPos + 5] = index + 3;
+			
+			states[i] = new RenderState();
+		}
+		
+		if (texturedTileShader == null) 
+		{
+			texturedTileShader = new FlxTexturedShader();
 		}
 	}
 	
@@ -123,8 +141,6 @@ class QuadBatch implements IFlxDestroyable
 	{
 		if (this.gl == null || this.gl != gl)
 		{
-			// TODO: clean previous data if there was some...
-			
 			this.gl = gl;
 			
 			// create a couple of buffers
@@ -139,16 +155,16 @@ class QuadBatch implements IFlxDestroyable
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
 			GL.bufferData(GL.ARRAY_BUFFER, vertices, GL.DYNAMIC_DRAW);
-			
-			// TODO: create shaders...
-			
 		}
 	}
 	
-	private function begin(renderSession:RenderSession):Void
+	private function begin(parent:DisplayObject, renderSession:RenderSession):Void
 	{
+		this.parent = parent;
 		this.renderSession = renderSession;
-	//	this.shader = this.renderSession.shaderManager.defaultShader;
+		this.gl = renderSession.gl;
+		this.renderer = cast renderSession.renderer;
+		
 		start();
 	}
 	
@@ -157,7 +173,7 @@ class QuadBatch implements IFlxDestroyable
 		flush();
 	}
 	
-	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
 	{
 		var texture:FlxGraphic = frame.parent;
 		
@@ -188,23 +204,28 @@ class QuadBatch implements IFlxDestroyable
 		var tx:Float = matrix.tx;
 		var ty:Float = matrix.ty;
 		
+		var intX:Int, intY:Int;
+		
 		if (roundPixels)
 		{
-			// xy
-			positions[i] = tx | 0; 							// 0 * a + 0 * c + tx | 0;
-			positions[i + 1] = ty | 0; 						// 0 * b + 0 * d + ty | 0;
+			intX = Std.int(tx);
+			intY = Std.int(ty);
 			
 			// xy
-			positions[i + 5] = w * a + tx | 0;				// w * a + 0 * c + tx | 0;
-			positions[i + 6] = w * b + ty | 0;				// w * b + 0 * d + ty | 0;
+			positions[i] = intX; 							// 0 * a + 0 * c + tx | 0;
+			positions[i + 1] = intY; 						// 0 * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 10] = h * c + tx | 0;				// 0 * a + h * c + tx | 0;
-			positions[i + 11] = h * d + ty | 0;				// 0 * b + h * d + ty | 0;
+			positions[i + 5] = w * a + intX;				// w * a + 0 * c + tx | 0;
+			positions[i + 6] = w * b + intY;				// w * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 15] = w * a + h * c + tx | 0;
-			positions[i + 16] = w * b + h * d + ty | 0;
+			positions[i + 10] = h * c + intX;				// 0 * a + h * c + tx | 0;
+			positions[i + 11] = h * d + intY;				// 0 * b + h * d + ty | 0;
+			
+			// xy
+			positions[i + 15] = w * a + h * c + intX;
+			positions[i + 16] = w * b + h * d + intY;
 		}
 		else
 		{
@@ -221,8 +242,8 @@ class QuadBatch implements IFlxDestroyable
 			positions[i + 11] = h * d + ty;
 			
 			// xy
-			positions[i + 15] = w * a + h * c + tx | 0;
-			positions[i + 16] = w * b + h * d + ty | 0;
+			positions[i + 15] = w * a + h * c + tx;
+			positions[i + 16] = w * b + h * d + ty;
 		}
 		
 		// uv
@@ -250,17 +271,17 @@ class QuadBatch implements IFlxDestroyable
 		
 		if (transform != null)
 		{
-			if (colored)
-			{
-				r = transform.redMultiplier;
-				g = transform.greenMultiplier;
-				b = transform.blueMultiplier;
-			}
+			r = transform.redMultiplier;
+			g = transform.greenMultiplier;
+			b = transform.blueMultiplier;
 			
 			a = transform.alphaMultiplier;
 		}
 		
 		colors[i + 4] = colors[i + 9] = colors[i + 14] = colors[i + 19] = FlxColor.fromRGBFloat(r, g, b, a);
+		
+		var state:RenderState = states[currentBatchSize];
+		state.set(frame.parent, transform, blend, smoothing, shader);
 		
 		currentBatchSize++;
 	}
@@ -275,8 +296,6 @@ class QuadBatch implements IFlxDestroyable
 		if (dirty)
 		{
 			dirty = false;
-			
-			// TODO: set shader here...
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -299,55 +318,58 @@ class QuadBatch implements IFlxDestroyable
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, view);
 		}
 		
-		// TODO: continue from here...
-		
 		var nextTexture:FlxGraphic;
 		var nextBlendMode:BlendMode;
 		var nextShader:FlxShader;
 		var batchSize:Int = 0;
-		var start:Int = 0;
+		var startIndex:Int = 0;
 		
-		var currentBaseTexture:FlxGraphic = null;
+		var nextRedOffset:Float = 0.0;
+		var nextGreenOffset:Float = 0.0;
+		var nextBlueOffset:Float = 0.0;
+		var nextAlphaOffset:Float = 0.0;
+		
+		var currentTexture:FlxGraphic = null;
 		var currentBlendMode:BlendMode = null;
 		var currentShader:FlxShader = null;
 		
+		var currentRedOffset:Float = 0.0;
+		var currentGreenOffset:Float = 0.0;
+		var currentBlueOffset:Float = 0.0;
+		var currentAlphaOffset:Float = 0.0;
+		
+		uColorOffset[0] = uColorOffset[1] = uColorOffset[2] = uColorOffset[3] = 0.0;
+		
 		var blendSwap:Bool = false;
 		var shaderSwap:Bool = false;
-		var sprite;
+		var colorOffsetSwap:Bool = false;
+		var state:RenderState = null;
 		
-		for (var i = 0, j = this.currentBatchSize; i < j; i++) {
+		for (i in 0...currentBatchSize)
+		{
+			state = states[i];
 			
-			sprite = this.sprites[i];
+			nextTexture = state.texture;
 			
-			if (sprite.tilingTexture)
+			nextBlendMode = state.blend;
+			nextShader = (state.shader != null) ? state.shader : texturedTileShader;
+			
+			nextRedOffset = state.redOffset;
+			nextGreenOffset = state.greenOffset;
+			nextBlueOffset = state.blueOffset;
+			nextAlphaOffset = state.alphaOffset;
+			
+			blendSwap = (currentBlendMode != nextBlendMode);
+			shaderSwap = (currentShader != nextShader);
+			colorOffsetSwap = (currentRedOffset != nextRedOffset || currentGreenOffset != nextGreenOffset || currentBlueOffset != nextBlueOffset || currentAlphaOffset != nextAlphaOffset);
+			
+			if ((currentTexture != nextTexture) || blendSwap || shaderSwap || colorOffsetSwap)
 			{
-				nextTexture = sprite.tilingTexture.baseTexture;
-			}
-			else
-			{
-				nextTexture = sprite.texture.baseTexture;
-			}
-			
-			nextBlendMode = sprite.blendMode;
-			nextShader = sprite.shader || this.defaultShader;
-			
-			blendSwap = currentBlendMode !== nextBlendMode;
-			shaderSwap = currentShader !== nextShader; // should I use _UIDS???
-			
-			var skip = nextTexture.skipRender;
-			
-			if (skip && sprite.children.length > 0)
-			{
-				skip = false;
-			}
-			
-			if ((currentBaseTexture !== nextTexture && !skip) || blendSwap || shaderSwap)
-			{
-				this.renderBatch(currentBaseTexture, batchSize, start);
+				renderBatch(currentTexture, batchSize, startIndex);
 				
-				start = i;
+				startIndex = i;
 				batchSize = 0;
-				currentBaseTexture = nextTexture;
+				currentTexture = nextTexture;
 				
 				if (blendSwap)
 				{
@@ -355,79 +377,56 @@ class QuadBatch implements IFlxDestroyable
 					this.renderSession.blendModeManager.setBlendMode(currentBlendMode);
 				}
 				
+				if (colorOffsetSwap)
+				{
+					currentRedOffset = nextRedOffset;
+					currentGreenOffset = nextGreenOffset;
+					currentBlueOffset = nextBlueOffset;
+					currentAlphaOffset = nextAlphaOffset;
+					
+					uColorOffset[0] = currentRedOffset;
+					uColorOffset[1] = currentGreenOffset;
+					uColorOffset[2] = currentBlueOffset;
+					uColorOffset[3] = currentAlphaOffset;
+				}
+				
 				if (shaderSwap)
 				{
-					currentShader = nextShader;
-					
-					shader = currentShader.shaders[gl.id];
-					
-					if (!shader)
-					{
-						shader = new PIXI.PixiShader(gl);
-						
-						shader.fragmentSrc = currentShader.fragmentSrc;
-						shader.uniforms = currentShader.uniforms;
-						shader.init();
-						
-						currentShader.shaders[gl.id] = shader;
-					}
+					shader = currentShader = nextShader;
 					
 					// set shader function???
 					this.renderSession.shaderManager.setShader(shader);
-					
-					if (shader.dirty)
-					{
-						shader.syncUniforms();
-					}
-					
-					// both these only need to be set if they are changing..
-					// set the projection
-					var projection = this.renderSession.projection;
-					gl.uniform2f(shader.projectionVector, projection.x, projection.y);
-					
-					// TODO - this is temporary!
-					var offsetVector = this.renderSession.offset;
-					gl.uniform2f(shader.offsetVector, offsetVector.x, offsetVector.y);
-					
-					// set the pointers
 				}
 			}
 			
 			batchSize++;
 		}
 		
-		this.renderBatch(currentBaseTexture, batchSize, start);
+		renderBatch(currentTexture, batchSize, startIndex);
 		
 		// then reset the batch!
 		currentBatchSize = 0;
 	}
 	
-	private function renderBatch(texture, size, startIndex):Void
+	private function renderBatch(texture:FlxGraphic, size:Int, startIndex:Int):Void
 	{
-		if (size === 0)
+		if (size == 0)
 		{
 			return;
 		}
 		
-		var gl = this.gl;
+		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 		
-		// check if a texture is dirty..
-		if (texture._dirty[gl.id])
-		{
-			if (!this.renderSession.renderer.updateTexture(texture))
-			{
-				//  If updateTexture returns false then we cannot render it, so bail out now
-				return;
-			}
-		}
-		else
-		{
-			// bind the current texture
-			gl.bindTexture(gl.TEXTURE_2D, texture._glTextures[gl.id]);
-		}
+		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
+		GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
+		
+		var matrix = renderer.getMatrix(parent.__worldTransform);
+		var uMatrix:Array<Float> = GLRenderHelper.matrixToArray(matrix);
+		
+		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, matrix);
 		
 		// now draw those suckas!
-		gl.drawElements(gl.TRIANGLES, size * 6, gl.UNSIGNED_SHORT, startIndex * 6 * 2);
+		GL.drawElements(GL.TRIANGLES, size * INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * INDICES_PER_QUAD * 2);
 		
 		// increment the draw count
 		this.renderSession.drawCount++;
@@ -441,7 +440,11 @@ class QuadBatch implements IFlxDestroyable
 	private function stop():Void
 	{
 		flush();
+		
 		dirty = true;
+		renderSession = null;
+		renderer = null;
+		parent = null;
 	}
 	
 	public function destroy():Void
@@ -452,21 +455,31 @@ class QuadBatch implements IFlxDestroyable
 		positions = null;
 		colors = null;
 		
-		/*
-		this.gl.deleteBuffer(this.vertexBuffer);
-		this.gl.deleteBuffer(this.indexBuffer);
+		if (vertexBuffer != null)
+		{
+			GL.deleteBuffer(vertexBuffer);
+			vertexBuffer = null;
+		}
 		
-		this.currentBaseTexture = null;
+		if (indexBuffer != null)
+		{
+			GL.deleteBuffer(indexBuffer);
+			indexBuffer = null;
+		}
 		
+		states = FlxDestroyUtil.destroyArray(states);
 		
-		*/
-		
+		renderSession = null;
+		renderer = null;
+		parent = null;
 		gl = null;
+		
+		shader = null;
 	}
 	
 }
 
-class RenderState
+class RenderState implements IFlxDestroyable
 {
 	public var blend:BlendMode;
 	public var smoothing:Bool;
@@ -477,17 +490,10 @@ class RenderState
 	public var blueOffset:Float;
 	public var alphaOffset:Float;
 	
-	public inline function equals(texture:FlxGraphic, color:ColorTransform, blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Bool
-	{
-		return (this.texture == texture 
-			&& this.blend == blend
-			&& this.smoothing == smooth
-			&& this.shader == shader
-			&& this.redOffset == color.redOffset
-			&& this.greenOffset == color.greenOffset
-			&& this.blueOffset == color.blueOffset
-			&& this.alphaOffset = color.alphaOffset);
-	}
+	public var startIndex:Int = 0;
+	public var size:Int = 0;
+	
+	public function new() {}
 	
 	public inline function set(texture:FlxGraphic, color:ColorTransform, blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Void
 	{
@@ -496,9 +502,17 @@ class RenderState
 		this.blend = blend;
 		this.shader = shader;
 		
-		this.redOffset = color.redOffset;
-		this.greenOffset = color.greenOffset;
-		this.blueOffset = color.blueOffset;
-		this.alphaOffset = color.alphaOffset;
+		this.redOffset = color.redOffset / 255;
+		this.greenOffset = color.greenOffset / 255;
+		this.blueOffset = color.blueOffset / 255;
+		this.alphaOffset = color.alphaOffset / 255;
 	}
+	
+	public function destroy():Void
+	{
+		this.texture = null;
+		this.blend = null;
+		this.shader = null;
+	}
+	
 }

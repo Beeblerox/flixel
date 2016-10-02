@@ -54,6 +54,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	{
 		super();
 		
+		var batcher:QuadBatch;
+		
 		__width = width;
 		__height = height;
 		
