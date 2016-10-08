@@ -63,7 +63,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		super();
 		
 		testSprite = new FlxSprite();
-		testSprite.makeGraphic(100, 200, FlxColor.RED);
+		testSprite.makeGraphic(100, 200, FlxColor.GREEN);
 		
 		batcher = new QuadBatch();
 		
@@ -187,8 +187,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		}
 		else
 		{
-			var matrix = renderer.getMatrix(transform);
-			uMatrix = GLRenderHelper.matrixToArray(matrix);
+			uMatrix = renderer.getMatrix(transform);
 		}
 		
 		var worldColor:ColorTransform = this.__worldColorTransform;
@@ -302,14 +301,19 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		}
 		
 	//	renderSession.shaderManager.setShader(null);
-		renderSession.blendModeManager.setBlendMode(null);
+	//	renderSession.blendModeManager.setBlendMode(null);
 		
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
 			
 			
 		batcher.begin(this, renderSession);
-		batcher.addQuad(testSprite.frame, new FlxMatrix());
+		var matrix = new FlxMatrix();
+		batcher.addQuad(testSprite.frame, matrix);
+		
+		matrix.translate(150, 10);
+		batcher.addQuad(testSprite.frame, matrix);
+		
 		batcher.end();
 	}
 	

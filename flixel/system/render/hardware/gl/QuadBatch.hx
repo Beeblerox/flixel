@@ -11,6 +11,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.GLRenderContext;
+import lime.math.Matrix4;
 import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl._internal.renderer.RenderSession;
@@ -36,6 +37,8 @@ class QuadBatch implements IFlxDestroyable
 	public static inline var INDICES_PER_QUAD:Int = 6;
 	
 	private static var texturedTileShader:FlxTexturedShader;
+	
+	private static var uMatrix:Float32Array = new Float32Array(16);
 	
 	private static var uColorOffset:Array<Float> = [];
 	
@@ -155,7 +158,6 @@ class QuadBatch implements IFlxDestroyable
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
 			GL.bufferData(GL.ARRAY_BUFFER, positions, GL.DYNAMIC_DRAW);
-		//	GL.bufferData(GL.ARRAY_BUFFER, vertices, GL.DYNAMIC_DRAW);
 		}
 	}
 	
@@ -264,21 +266,15 @@ class QuadBatch implements IFlxDestroyable
 		positions[i + 17] = uvx2;
 		positions[i + 18] = uvy2;
 		
-		var r:Float = 1.0;
-		var g:Float = 1.0;
-		var b:Float = 1.0;
-		var a:Float = 1.0;
+		var tint = 0xFFFFFF, color = 0xFFFFFFFF;
 		
 		if (transform != null)
 		{
-			r = transform.redMultiplier;
-			g = transform.greenMultiplier;
-			b = transform.blueMultiplier;
-			
-			a = transform.alphaMultiplier;
+			tint = Std.int(transform.redMultiplier * 255) << 16 | Std.int(transform.greenMultiplier * 255) << 8 | Std.int(transform.blueMultiplier * 255);
+			color = (Std.int(transform.alphaMultiplier * 255) & 0xFF) << 24 | tint;
 		}
 		
-		colors[i + 4] = colors[i + 9] = colors[i + 14] = colors[i + 19] = FlxColor.fromRGBFloat(r, g, b, a);
+		colors[i + 4] = colors[i + 9] = colors[i + 14] = colors[i + 19] = color;
 		
 		var state:RenderState = states[currentBatchSize];
 		state.set(frame.parent, transform, blend, smoothing, shader);
@@ -294,7 +290,7 @@ class QuadBatch implements IFlxDestroyable
 		}
 		
 		// TODO: fix this...
-		shader = texturedTileShader;
+		shader = (states[0].shader != null) ? states[0].shader : texturedTileShader;
 		
 		if (dirty)
 		{
@@ -317,7 +313,6 @@ class QuadBatch implements IFlxDestroyable
 		if (currentBatchSize > 0.5 * size)
 		{
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, positions);
-		//	GL.bufferSubData(GL.ARRAY_BUFFER, 0, vertices);
 		}
 		else
 		{
@@ -422,17 +417,15 @@ class QuadBatch implements IFlxDestroyable
 			return;
 		}
 		
-		trace("shader is null: " + (shader == null));
-		
 		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 		
 		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
 		GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
 		
 		var matrix = renderer.getMatrix(parent.__worldTransform);
-		var uMatrix:Array<Float> = GLRenderHelper.matrixToArray(matrix);
+		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
 		
-		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, matrix);
+		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		// now draw those suckas!
 		GL.drawElements(GL.TRIANGLES, size * INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * INDICES_PER_QUAD * 2);
