@@ -911,6 +911,15 @@ class FlxCamera extends FlxBasic
 		}
 	}
 	
+	/**
+	 * Checks whether this camera contains a given point or rectangle, in
+	 * screen coordinates.
+	 */
+	public inline function containsPoint(point:FlxPoint, width:Float = 0, height:Float = 0):Bool
+	{
+		return (point.x + width > 0) && (point.x < this.width) && (point.y + height > 0) && (point.y < this.height);
+	}
+	
 	@:allow(flixel.system.frontEnds.CameraFrontEnd)
 	private function checkResize():Void
 	{

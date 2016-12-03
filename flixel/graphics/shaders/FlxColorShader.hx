@@ -10,9 +10,6 @@ class FlxColorShader extends FlxShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
-		#ifdef GL_ES
-			precision mediump float;
-		#endif
 			attribute vec4 aPosition;
 			attribute vec4 aColor;
 			
@@ -42,9 +39,11 @@ class FlxColorShader extends FlxShader
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
-		glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		
 		super();
+		
+		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
+		
+		__glSourceDirty = true;
 	}
 }

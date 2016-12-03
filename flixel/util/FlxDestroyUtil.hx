@@ -128,7 +128,7 @@ class FlxDestroyUtil
 			if (shader.glProgram != null)
 			{
 				GL.deleteProgram(shader.glProgram);
-				shader.glProgram = null;
+			//	shader.glProgram = null;
 			}
 			
 			shader.data = null;

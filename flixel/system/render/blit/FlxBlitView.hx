@@ -89,6 +89,11 @@ class FlxBlitView extends FlxCameraView
 	 */
 	private var regen:Bool = false;
 	
+	/**
+	 * Internal helper for drawing pixels on the camera. Using this fixes some weird bugs with flash software renderer.
+	 */
+	private var _bitmap:Bitmap;
+	
 	public function new(camera:FlxCamera) 
 	{
 		super(camera);
@@ -103,6 +108,8 @@ class FlxBlitView extends FlxCameraView
 		_flashBitmap = new Bitmap(buffer);
 		_scrollRect.addChild(_flashBitmap);
 		_fill = new BitmapData(camera.width, camera.height, true, FlxColor.TRANSPARENT);
+		
+		_bitmap = new Bitmap();
 	}
 	
 	override public function destroy():Void 
@@ -119,6 +126,7 @@ class FlxBlitView extends FlxCameraView
 		_scrollRect = null;
 		_flashRect = null;
 		_flashPoint = null;
+		_bitmap = null;
 	}
 	
 	override public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix,
@@ -126,7 +134,12 @@ class FlxBlitView extends FlxCameraView
 	{
 		if (pixels != null)
 		{
+		//	#if flash
+		//	_bitmap.bitmapData = pixels;
+		//	buffer.draw(_bitmap, matrix, null, blend, null, (smoothing || antialiasing));
+		//	#else
 			buffer.draw(pixels, matrix, null, blend, null, (smoothing || antialiasing));
+		//	#end
 		}
 		else
 		{

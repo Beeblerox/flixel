@@ -306,7 +306,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
 			
-			
+		/*	
 		batcher.begin(this, renderSession);
 		var matrix = new FlxMatrix();
 		batcher.addQuad(testSprite.frame, matrix);
@@ -314,7 +314,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		matrix.translate(150, 10);
 		batcher.addQuad(testSprite.frame, matrix);
 		
-		batcher.end();
+		batcher.end();*/
 	}
 	
 	private function get_renderHelper():GLRenderHelper
