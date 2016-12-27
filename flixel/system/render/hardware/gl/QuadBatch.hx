@@ -32,20 +32,37 @@ import openfl.utils.Float32Array;
  */
 class QuadBatch implements IFlxDestroyable
 {
+	/**
+	 * Number of bytes per one element in `vertices` buffer.
+	 */
 	public static inline var BYTES_PER_ELEMENT:Int = 4;
-	public static inline var VERTICES_PER_QUAD:Int = 4;
-	public static inline var INDICES_PER_QUAD:Int = 6;
-	
-	private static var texturedTileShader:FlxTexturedShader;
-	
-	private static var uMatrix:Float32Array = new Float32Array(16);
-	
-	private static var uColorOffset:Array<Float> = [];
-	
 	/**
 	 * Number of elements per vertex in spritebatch.
 	 */
 	public static inline var ELEMENTS_PER_VERTEX:Int = 5;
+	/**
+	 * Number of vertices per one quad.
+	 */
+	public static inline var VERTICES_PER_QUAD:Int = 4;
+	/**
+	 * Number of indices per one quad.
+	 */
+	public static inline var INDICES_PER_QUAD:Int = 6;
+	
+	/**
+	 * Default tile shader.
+	 */
+	private static var defaultShader:FlxTexturedShader;
+	
+	/**
+	 * Helper array for storing uniform matrix coefficients.
+	 */
+	private static var uMatrix:Float32Array = new Float32Array(16);
+	
+	/**
+	 * Helper array for storing color offsets.
+	 */
+	private static var uColorOffset:Array<Float> = [];
 	
 	public var roundPixels:Bool = false;
 	
@@ -84,14 +101,27 @@ class QuadBatch implements IFlxDestroyable
 	 */
 	private var indices:UInt16Array;
 	
-	private var lastIndexCount:Int = 0;
-	
+	/**
+	 * Current number of quads in our batch.
+	 */
 	private var currentBatchSize:Int = 0;
 	
-	private var currentBaseTexture:FlxGraphic;
+	/**
+	 * Current texture being used by batch.
+	 */
+	private var currentTexture:FlxGraphic;
+	
+	// TODO: use this var...
+	/**
+	 * Current shader used by batch.
+	 */
+	private var currentShader:FlxShader;
 	
 	private var dirty:Bool = true;
 	
+	/**
+	 * Array for holding render states in our batch...
+	 */
 	private var states:Array<RenderState> = [];
 	
 	private var vertexBuffer:GLBuffer;
@@ -119,24 +149,30 @@ class QuadBatch implements IFlxDestroyable
 		colors = new UInt32Array(vertices);
 		indices = new UInt16Array(numIndices);
 		
-		var indexPos:Int, index:Int;
+		var indexPos:Int = 0;
+		var index:Int = 0;
+		
+		while (indexPos < numIndices)
+		{
+			this.indices[indexPos + 0] = index + 0;
+			this.indices[indexPos + 1] = index + 1;
+			this.indices[indexPos + 2] = index + 2;
+			this.indices[indexPos + 3] = index + 0;
+			this.indices[indexPos + 4] = index + 2;
+			this.indices[indexPos + 5] = index + 3;
+			
+			numIndices += INDICES_PER_QUAD;
+			index += VERTICES_PER_QUAD;
+		}
+		
 		for (i in 0...size)
 		{
-			indexPos = i * INDICES_PER_QUAD;
-			index = i * VERTICES_PER_QUAD;
-			indices[indexPos + 0] = index + 0;
-			indices[indexPos + 1] = index + 1;
-			indices[indexPos + 2] = index + 2;
-			indices[indexPos + 3] = index + 2;
-			indices[indexPos + 4] = index + 1;
-			indices[indexPos + 5] = index + 3;
-			
 			states[i] = new RenderState();
 		}
 		
-		if (texturedTileShader == null) 
+		if (defaultShader == null) 
 		{
-			texturedTileShader = new FlxTexturedShader();
+			defaultShader = new FlxTexturedShader();
 		}
 	}
 	
@@ -185,7 +221,7 @@ class QuadBatch implements IFlxDestroyable
 		if (currentBatchSize > size)
 		{
 			flush();
-			currentBaseTexture = texture;
+			currentTexture = texture;
 		}
 		
 		// get the uvs for the texture
