@@ -49,6 +49,8 @@ class QuadBatch implements IFlxDestroyable
 	 */
 	public static inline var INDICES_PER_QUAD:Int = 6;
 	
+	public static inline var BYTES_PER_INDEX:Int = 2;
+	
 	/**
 	 * Default tile shader.
 	 */
@@ -381,6 +383,7 @@ class QuadBatch implements IFlxDestroyable
 		var blendSwap:Bool = false;
 		var shaderSwap:Bool = false;
 		var colorOffsetSwap:Bool = false;
+		var textureSwap:Bool = false;
 		var state:RenderState = null;
 		
 		for (i in 0...currentBatchSize)
@@ -390,7 +393,7 @@ class QuadBatch implements IFlxDestroyable
 			nextTexture = state.texture;
 			
 			nextBlendMode = state.blend;
-			nextShader = (state.shader != null) ? state.shader : texturedTileShader;
+			nextShader = (state.shader != null) ? state.shader : defaultShader;
 			
 			nextRedOffset = state.redOffset;
 			nextGreenOffset = state.greenOffset;
@@ -400,8 +403,9 @@ class QuadBatch implements IFlxDestroyable
 			blendSwap = (currentBlendMode != nextBlendMode);
 			shaderSwap = (currentShader != nextShader);
 			colorOffsetSwap = (currentRedOffset != nextRedOffset || currentGreenOffset != nextGreenOffset || currentBlueOffset != nextBlueOffset || currentAlphaOffset != nextAlphaOffset);
+			textureSwap = (currentTexture != nextTexture);
 			
-			if ((currentTexture != nextTexture) || blendSwap || shaderSwap || colorOffsetSwap)
+			if (textureSwap || blendSwap || shaderSwap || colorOffsetSwap)
 			{
 				renderBatch(currentTexture, batchSize, startIndex);
 				
@@ -464,7 +468,7 @@ class QuadBatch implements IFlxDestroyable
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		// now draw those suckas!
-		GL.drawElements(GL.TRIANGLES, size * INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * INDICES_PER_QUAD * 2);
+		GL.drawElements(GL.TRIANGLES, size * INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * INDICES_PER_QUAD * BYTES_PER_INDEX);
 		
 		// increment the draw count
 		this.renderSession.drawCount++;
