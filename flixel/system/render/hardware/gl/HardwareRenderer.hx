@@ -56,7 +56,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	// TODO: remove this var...
 	var testSprite:FlxSprite;
 	
-	public var batcher:QuadBatch;
+//	public var batcher:QuadBatch;
 	
 	public function new(width:Int, height:Int)
 	{
@@ -65,7 +65,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		testSprite = new FlxSprite();
 		testSprite.makeGraphic(100, 200, FlxColor.GREEN);
 		
-		batcher = new QuadBatch();
+//		batcher = new QuadBatch();
 		
 		__width = width;
 		__height = height;

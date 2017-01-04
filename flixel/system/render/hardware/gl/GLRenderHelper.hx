@@ -16,6 +16,7 @@ import openfl.gl.GLBuffer;
 import openfl.gl.GLTexture;
 import openfl.utils.Float32Array;
 
+@:access(openfl.display.DisplayObject.__worldTransform)
 class GLRenderHelper implements IFlxDestroyable
 {
 	/**

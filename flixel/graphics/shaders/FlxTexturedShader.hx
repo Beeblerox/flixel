@@ -46,7 +46,7 @@ class FlxTexturedShader extends FlxShader
 				} 
 				else 
 				{
-					result = vec4(color.rgb / color.a, color.a) * vColor * uColor;
+					result = vec4(color.rgb * color.a * vColor.a * uColor.a, color.a * vColor.a * uColor.a) * vColor *  uColor;
 				}
 				
 				result = result + uColorOffset;

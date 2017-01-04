@@ -223,5 +223,6 @@ class FlxAssets
 		var graphic:FlxGraphic = FlxGraphic.fromClass(GraphicVirtualInput);
 		return FlxAtlasFrames.fromSpriteSheetPacker(graphic, Std.string(new VirtualInputData()));
 	}
+	
 #end
 }
