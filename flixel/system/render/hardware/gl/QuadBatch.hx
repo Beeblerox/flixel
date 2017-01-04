@@ -33,10 +33,6 @@ import openfl.utils.Float32Array;
 class QuadBatch implements IFlxDestroyable
 {
 	/**
-	 * Number of bytes per one element in `vertices` buffer.
-	 */
-	public static inline var BYTES_PER_ELEMENT:Int = 4;
-	/**
 	 * Number of elements per vertex in spritebatch.
 	 */
 	public static inline var ELEMENTS_PER_VERTEX:Int = 5;
@@ -143,7 +139,7 @@ class QuadBatch implements IFlxDestroyable
 	{
 		this.size = size;
 		
-		numBytes = size * BYTES_PER_ELEMENT * VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX;
+		numBytes = size * Float32Array.BYTES_PER_ELEMENT * VERTICES_PER_QUAD * ELEMENTS_PER_VERTEX;
 		numIndices = size * INDICES_PER_QUAD;
 		
 		vertices = new ArrayBuffer(numBytes);
@@ -233,7 +229,7 @@ class QuadBatch implements IFlxDestroyable
 		var uvx2:Float = uv.width;
 		var uvy2:Float = uv.height;
 		
-		var i = currentBatchSize * BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX;
+		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX;
 		
 		var rect:FlxRect = frame.frame;
 		var w:Float = rect.width;
@@ -338,7 +334,7 @@ class QuadBatch implements IFlxDestroyable
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indexBuffer);
 			
 			// this is the same for each shader?
-			var stride:Int = ELEMENTS_PER_VERTEX * BYTES_PER_ELEMENT;
+			var stride:Int = ELEMENTS_PER_VERTEX * Float32Array.BYTES_PER_ELEMENT;
 			
 			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, stride, 0);
 			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, 2 * 4);
@@ -354,7 +350,7 @@ class QuadBatch implements IFlxDestroyable
 		}
 		else
 		{
-			var view = positions.subarray(0, currentBatchSize * BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX);
+			var view = positions.subarray(0, currentBatchSize * Float32Array.BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX);
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, view);
 		}
 		

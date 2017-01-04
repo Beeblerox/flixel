@@ -5,6 +5,7 @@ import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flixel.util.FlxPool.IFlxPooled;
 import openfl.display.Shader;
+import openfl.gl.GLBuffer;
 
 #if FLX_RENDER_GL
 import openfl.gl.GL;
@@ -136,6 +137,18 @@ class FlxDestroyUtil
 			shader.glVertexSource = null;
 			shader.glFragmentSource = null;
 		//	gl = null;
+		}
+		#end
+		
+		return null;
+	}
+	
+	public static function destroyBuffer(buffer:GLBuffer):GLBuffer
+	{
+		#if FLX_RENDER_GL
+		if (buffer != null)
+		{
+			GL.deleteBuffer(buffer);
 		}
 		#end
 		

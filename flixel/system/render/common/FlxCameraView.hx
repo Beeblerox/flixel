@@ -45,7 +45,6 @@ class FlxCameraView implements IFlxDestroyable
 	
 	public static inline var INDICES_PER_TILE:Int = 6;
 	public static inline var MINIMUM_TILE_COUNT_PER_BUFFER:Int = 10;
-	public static inline var BYTES_PER_ELEMENT:Int = 4;
 	
 	/**
 	 * Max size of the batch. Used for quad render items. If you'll try to add one more tile to the full batch, then new batch will be started.
