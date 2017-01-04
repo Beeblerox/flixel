@@ -6,7 +6,7 @@ import flixel.system.FlxAssets.FlxShader;
  * ...
  * @author Yanrishatum
  */
-class FlxTexturedShader extends FlxShader
+class FlxTexturedTrianglesShader extends FlxShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -34,6 +34,7 @@ class FlxTexturedShader extends FlxShader
 			uniform sampler2D uImage0;
 			uniform vec4 uColor;
 			uniform vec4 uColorOffset;
+			uniform vec4 uTrianglesColor;
 			
 			void main(void) 
 			{
@@ -46,8 +47,8 @@ class FlxTexturedShader extends FlxShader
 				} 
 				else 
 				{
-					float alpha = color.a * vColor.a * uColor.a;
-					result = vec4(color.rgb * alpha, alpha) * vColor *  uColor;
+					float alpha = color.a * vColor.a * uColor.a * uTrianglesColor.a;
+					result = vec4(color.rgb * alpha, alpha) * vColor *  uColor * uTrianglesColor;
 				}
 				
 				result = result + uColorOffset;
