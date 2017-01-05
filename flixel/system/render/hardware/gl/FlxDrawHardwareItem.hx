@@ -16,39 +16,12 @@ import lime.utils.Int16Array; // UInt32Array;
  */
 class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 {
-	public var buffer:Float32Array;
-	public var indexes:Int16Array;
-	
-	public var glBuffer:GLBuffer;
-	public var glIndexes:GLBuffer;
-	
-	public var indexBufferDirty:Bool;
-	public var vertexBufferDirty:Bool;
-	
-	public var vertexPos:Int = 0;
-	public var indexPos:Int = 0;
+	public static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 5;
+	public static inline var ELEMENTS_PER_NON_TEXTURED_VERTEX:Int = 3;
 	
 	public function new() 
 	{
 		super();
-	}
-	
-	override public function destroy():Void 
-	{
-		super.destroy();
-		
-		buffer = null;
-		indexes = null;
-		
-		if (glBuffer != null)
-			GL.deleteBuffer(glBuffer);
-		
-		glBuffer = null;
-		
-		if (glIndexes != null)
-			GL.deleteBuffer(glIndexes);
-		
-		glIndexes = null;
 	}
 	
 	override public function render(view:FlxHardwareView):Void 
@@ -57,15 +30,7 @@ class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 		view.drawItem(this);
 		#end
 	}
-	
-	override public function reset():Void 
-	{
-		super.reset();
-		
-		indexPos = 0;
-		vertexPos = 0;
-	}
-	
+	/*
 	// Set values
 	private inline function addTexturedVertexData(x:Float, y:Float, u:Float, v:Float, r:Float = 1.0, g:Float = 1.0, b:Float = 1.0, a:Float = 1.0):Void
 	{
@@ -99,15 +64,10 @@ class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 		return Std.int(indexPos / 3);
 	}
 	
-	override function get_elementsPerVertex():Int 
-	{
-		return (graphics != null) ? FlxCameraView.ELEMENTS_PER_TEXTURED_VERTEX : FlxCameraView.ELEMENTS_PER_NONTEXTURED_VERTEX;
-	}
-	
 	override function get_elementsPerTile():Int 
 	{
 		return (graphics != null) ? FlxCameraView.ELEMENTS_PER_TEXTURED_TILE : FlxCameraView.ELEMENTS_PER_NONTEXTURED_TILE;
 	}
-	
+	*/
 }
 #end

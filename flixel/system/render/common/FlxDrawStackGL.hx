@@ -9,8 +9,9 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
+import flixel.system.render.common.DrawItem.FlxDrawQuadsItem;
+import flixel.system.render.common.DrawItem.FlxDrawTrianglesItem;
 import flixel.system.render.hardware.FlxHardwareView;
-import flixel.system.render.hardware.gl.QuadBatch;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -28,7 +29,7 @@ using flixel.util.FlxColorTransformUtil;
  * ...
  * @author Zaphod
  */
-class FlxDrawStack implements IFlxDestroyable
+class FlxDrawStackGL implements IFlxDestroyable
 {
 	/**
 	 * Currently used draw stack item
@@ -41,23 +42,14 @@ class FlxDrawStack implements IFlxDestroyable
 	/**
 	 * Last draw tiles item
 	 */
-	private var _headTiles:QuadBatch;
-	/**
-	 * Last draw triangles item
-	 */
-//	private var _headTriangles:FlxDrawTrianglesItem;
+	private var _headTiles:FlxDrawQuadsItem;
 	
 	public var view:FlxHardwareView;
 	
 	/**
 	 * Draw tiles stack items that can be reused
 	 */
-	private static var _storageTilesHead:QuadBatch;
-	
-	/**
-	 * Draw triangles stack items that can be reused
-	 */
-//	private static var _storageTrianglesHead:FlxDrawTrianglesItem;
+	private static var _storageTilesHead:FlxDrawQuadsItem;
 	
 	private var _helperMatrix:FlxMatrix = new FlxMatrix();
 	
@@ -77,7 +69,7 @@ class FlxDrawStack implements IFlxDestroyable
 	{
 		destroyDrawItemsChain(_headOfDrawStack);
 		destroyDrawItemsChain(_storageTilesHead);
-	//	destroyDrawItemsChain(_storageTrianglesHead);
+		destroyDrawItemsChain(_storageTrianglesHead);
 	}
 	
 	private function destroyDrawItemsChain(item:FlxDrawBaseItem<Dynamic>):Void
@@ -95,30 +87,25 @@ class FlxDrawStack implements IFlxDestroyable
 	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	{
-		trace("startQuadBatch");
+		var itemToReturn:FlxDrawQuadsItem = null;
 		
-		var itemToReturn:QuadBatch = null;
-		
-		if (_currentDrawItem != null
+		if (_currentDrawItem != null /* && _currentDrawItem.type == FlxDrawItemType.TILES*/ 
 			&& _currentDrawItem.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader)
 			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_headTiles))
 		{	
-			trace("_currentDrawItem != null");
 			return _headTiles;
 		}
 		
 		if (_storageTilesHead != null)
 		{
-			trace("_storageTilesHead != null");
 			itemToReturn = _storageTilesHead;
-			var newHead:QuadBatch = _storageTilesHead.nextTyped;
+			var newHead:FlxDrawQuadsItem = _storageTilesHead.nextTyped;
 			itemToReturn.reset();
 			_storageTilesHead = newHead;
 		}
 		else
 		{
-			trace("new QuadBatch");
-			itemToReturn = new QuadBatch(2000, (graphic != null));
+			itemToReturn = new FlxDrawQuadsItem();
 		}
 		
 		itemToReturn.set(graphic, colored, hasColorOffsets, blend, smooth, shader);
@@ -138,92 +125,21 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		_currentDrawItem = itemToReturn;
 		
-		trace((cast _currentDrawItem).textured);
-		
 		return itemToReturn;
-	}
-	/*
-	@:noCompletion
-	public function startTrianglesBatch(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader, numVertices:Int, numIndices:Int):FlxDrawTrianglesItem
-	{
-		
-		if (!FlxCameraView.BATCH_TRIANGLES)
-		{
-			return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
-		}
-		else if (_currentDrawItem != null
-			&& _currentDrawItem.equals(FlxDrawItemType.TRIANGLES, graphic, colored, false, blend, smooth, shader)
-			&& FlxDrawBaseItem.canAddTrianglesToTrianglesItem(_headTriangles, numVertices, numIndices))
-		{	
-			return _headTriangles;
-		}
-		
-		return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
-		
-		
 	}
 	
-	@:noCompletion
-	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesItem
-	{
-		var itemToReturn:FlxDrawTrianglesItem = null;
-		
-		if (_storageTrianglesHead != null)
-		{
-			itemToReturn = _storageTrianglesHead;
-			var newHead:FlxDrawTrianglesItem = _storageTrianglesHead.nextTyped;
-			itemToReturn.reset();
-			_storageTrianglesHead = newHead;
-		}
-		else
-		{
-			itemToReturn = new FlxDrawTrianglesItem();
-		}
-		
-		itemToReturn.set(graphic, colored, false, blend, smooth, shader);
-		
-		itemToReturn.nextTyped = _headTriangles;
-		_headTriangles = itemToReturn;
-		
-		if (_headOfDrawStack == null)
-		{
-			_headOfDrawStack = itemToReturn;
-		}
-		
-		if (_currentDrawItem != null)
-		{
-			_currentDrawItem.next = itemToReturn;
-		}
-		
-		_currentDrawItem = itemToReturn;
-		
-		return itemToReturn;
-	}
-	*/
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
 	{
-		#if FLX_RENDER_GL
-		trace("fillRect");
-		
 		_helperMatrix.identity();
 		var drawItem = startQuadBatch(null, true, false);
 		drawItem.addColorQuad(rect, _helperMatrix, color, alpha);
-		#else
-		var graphic:Graphics = view.canvas.graphics;
-		var camera:FlxCamera = view.camera;
-		graphic.beginFill(color, alpha);
-		graphic.drawRect(rect.x, rect.y, rect.width, rect.height);
-		graphic.endFill();
-		#end
 	}
 	
 	@:noCompletion
 	public function clearDrawStack():Void
 	{	
-		var currTiles:QuadBatch = _headTiles;
-		var newTilesHead:QuadBatch;
+		var currTiles:FlxDrawQuadsItem = _headTiles;
+		var newTilesHead:FlxDrawQuadsItem;
 		
 		while (currTiles != null)
 		{
@@ -233,23 +149,10 @@ class FlxDrawStack implements IFlxDestroyable
 			_storageTilesHead = currTiles;
 			currTiles = newTilesHead;
 		}
-		/*
-		var currTriangles:FlxDrawTrianglesItem = _headTriangles;
-		var newTrianglesHead:FlxDrawTrianglesItem;
 		
-		while (currTriangles != null)
-		{
-			newTrianglesHead = currTriangles.nextTyped;
-			currTriangles.reset();
-			currTriangles.nextTyped = _storageTrianglesHead;
-			_storageTrianglesHead = currTriangles;
-			currTriangles = newTrianglesHead;
-		}
-		*/
 		_currentDrawItem = null;
 		_headOfDrawStack = null;
 		_headTiles = null;
-	//	_headTriangles = null;
 	}
 	
 	public function render():Void
@@ -298,15 +201,7 @@ class FlxDrawStack implements IFlxDestroyable
 		uvtData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		/*
-		var isColored:Bool = (transform != null && transform.hasRGBMultipliers());
 		
-		var drawItem = startTrianglesBatch(	graphic, smoothing, isColored, blend, shader, 
-											Std.int(vertices.length / 2), 
-											(indices != null) ? indices.length : Std.int(vertices.length / 2));
-		
-		drawItem.addTriangles(vertices, indices, uvtData, matrix, transform);
-		*/
 	}
 	
 	public function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,
@@ -323,17 +218,11 @@ class FlxDrawStack implements IFlxDestroyable
 		if (hasColorOffsets)
 			drawItem.setOffsets(transform);
 		
-		drawItem.addUVQuad(graphic, rect, uv, matrix, transform);
+		drawItem.addUVQuad(rect, uv, matrix, transform);
 	}
 	
 	public function drawColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		#if (openfl >= "4.0.0")
-		var drawItem = startQuadBatch(null, true, false, blend, smoothing, shader);
-		#else
-		var drawItem = getNewDrawTrianglesItem(null, smoothing, true, blend, shader);
-		#end
-		drawItem.addColorQuad(rect, matrix, color, alpha);
 		
 	}
 }

@@ -65,7 +65,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		testSprite = new FlxSprite();
 		testSprite.makeGraphic(100, 200, FlxColor.GREEN);
 		
-//		batcher = new QuadBatch();
+	//	batcher = new QuadBatch();
 		
 		__width = width;
 		__height = height;
@@ -166,11 +166,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		// TODO: every camera will have its own render texture where i will draw everthing onto and only then draw this texture on the screen
 		// TODO: sprites might have renderTarget property
 		
-		
-		
 	//	FlxG.game.draw();
-		
-		
 		
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
@@ -190,6 +186,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 			uMatrix = renderer.getMatrix(transform);
 		}
 		
+		// TODO: use this var later...
 		var worldColor:ColorTransform = this.__worldColorTransform;
 		
 		uColor[0] = worldColor.redMultiplier;
@@ -208,95 +205,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		{
 			var state:FlxDrawHardwareItem<Dynamic> = states[i];
 			
-			nextShader = (state.graphics != null) ? texturedTileShader : coloredTileShader;
-			nextShader = (state.shader != null) ? state.shader : nextShader;
-			
-			if (shader != nextShader || shader == null)
-			{
-				shader = nextShader;
-				
-				shader.data.uMatrix.value = uMatrix;
-				shader.data.uColor.value = uColor;
-				
-				renderSession.shaderManager.setShader(shader);
-			}
-			
-			gl.uniform4f(shader.data.uColorOffset.index, state.redOffset, state.greenOffset, state.blueOffset, state.alphaOffset);
-			
-			if (blend != state.blending)
-			{
-				renderSession.blendModeManager.setBlendMode(state.blending);
-				blend = state.blending;
-			}
-			
-			if (texture != state.graphics)
-			{
-				texture = state.graphics;
-				
-				if (texture != null)
-				{
-					gl.bindTexture(gl.TEXTURE_2D, texture.bitmap.getTexture(gl));
-				}
-			}
-			
-			if (state.glBuffer == null)
-			{
-				state.glBuffer = gl.createBuffer();
-				state.glIndexes = gl.createBuffer();
-			}
-			
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, state.glIndexes);
-			
-			if (state.indexBufferDirty)
-			{
-				state.indexBufferDirty = false;
-				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, state.indexes, gl.DYNAMIC_DRAW);
-			}
-			
-			gl.bindBuffer(gl.ARRAY_BUFFER, state.glBuffer);
-			
-			if (state.vertexBufferDirty)
-			{
-				state.vertexBufferDirty = false;
-				gl.bufferData(gl.ARRAY_BUFFER, state.buffer, gl.DYNAMIC_DRAW);
-			}
-			
-			var stride:Int = state.elementsPerVertex * Float32Array.BYTES_PER_ELEMENT;
-			var offset:Int = 0;
-			
-			gl.vertexAttribPointer(shader.data.aPosition.index, 2, gl.FLOAT, false, stride, offset * Float32Array.BYTES_PER_ELEMENT);
-			offset += 2;
-			
-			if (texture != null)
-			{
-				// texture smoothing
-				if (state.antialiasing) 
-				{
-					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);	
-				} 
-				else 
-				{
-					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-				}
-				
-				#if !js
-				// texture repeat
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-				#end
-				
-				gl.vertexAttribPointer(shader.data.aTexCoord.index, 2, gl.FLOAT, false, stride, offset * Float32Array.BYTES_PER_ELEMENT);
-				offset += 2;
-			}
-			
-			gl.vertexAttribPointer(shader.data.aColor.index, 4, gl.FLOAT, false, stride, offset * Float32Array.BYTES_PER_ELEMENT);
-			
-			gl.drawElements(gl.TRIANGLES, state.indexPos, gl.UNSIGNED_SHORT, 0);
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-			gl.bindBuffer(gl.ARRAY_BUFFER, null);
-			
+			// TODO: fix this...
+			state.renderGL(transform, renderSession);
 			i++;
 		}
 		
@@ -306,7 +216,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
 			
-		/*	
+		/*
 		batcher.begin(this, renderSession);
 		var matrix = new FlxMatrix();
 		batcher.addQuad(testSprite.frame, matrix);
@@ -314,7 +224,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		matrix.translate(150, 10);
 		batcher.addQuad(testSprite.frame, matrix);
 		
-		batcher.end();*/
+		batcher.end();
+		*/
 	}
 	
 	private function get_renderHelper():GLRenderHelper

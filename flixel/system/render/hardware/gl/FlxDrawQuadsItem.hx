@@ -28,7 +28,7 @@ class FlxDrawQuadsItem extends FlxDrawHardwareItem<FlxDrawQuadsItem>
 		super();
 		type = FlxDrawItemType.TILES;
 	}
-	
+	/*
 	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0):Void
 	{
 		if (graphics != null)
@@ -62,6 +62,7 @@ class FlxDrawQuadsItem extends FlxDrawHardwareItem<FlxDrawQuadsItem>
 		
 		indexPos += FlxCameraView.INDICES_PER_TILE;
 		vertexBufferDirty = true;
+		
 	}
 	
 	override public function addUVQuad(rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform):Void
@@ -112,15 +113,17 @@ class FlxDrawQuadsItem extends FlxDrawHardwareItem<FlxDrawQuadsItem>
 		
 		indexPos += FlxCameraView.INDICES_PER_TILE;
 		vertexBufferDirty = true;
+		
 	}
 	
 	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
 		addUVQuad(frame.frame, frame.uv, matrix, transform);
 	}
-	
+	*/
 	private function ensureElement():Void
 	{
+		/*
 		if (buffer == null)
 		{
 			buffer = new Float32Array(FlxCameraView.MINIMUM_TILE_COUNT_PER_BUFFER * elementsPerTile);
@@ -137,10 +140,12 @@ class FlxDrawQuadsItem extends FlxDrawHardwareItem<FlxDrawQuadsItem>
 			
 			fillIndexBuffer();
 		}
+		*/
 	}
 	
 	private inline function fillIndexBuffer():Void
 	{
+		/*
 		var oldIndexes:Int16Array = indexes;
 		var oldLength:Int = (oldIndexes != null) ? oldIndexes.length : 0;
 		
@@ -167,16 +172,19 @@ class FlxDrawQuadsItem extends FlxDrawHardwareItem<FlxDrawQuadsItem>
 		}
 		
 		indexBufferDirty = true;
+		*/
 	}
 	
 	private function get_numTiles():Int
 	{
-		return Std.int(vertexPos / elementsPerTile);
+		return 0;
+	//	return Std.int(vertexPos / elementsPerTile);
 	}
 	
 	private function get_currentTilesCapacity():Int
 	{
-		return (buffer != null) ? Std.int(buffer.length / elementsPerTile) : 0;
+		return 0;
+		//return (buffer != null) ? Std.int(buffer.length / elementsPerTile) : 0;
 	}
 	
 	#else

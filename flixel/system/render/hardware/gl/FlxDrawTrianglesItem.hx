@@ -31,6 +31,8 @@ class FlxDrawTrianglesItem extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 	}
 	
 	#if !flash
+	
+	/*
 	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void 
 	{
 		addUVQuad(frame.frame, frame.uv, matrix, transform);
@@ -92,10 +94,12 @@ class FlxDrawTrianglesItem extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 		
 		vertexBufferDirty = true;
 		indexBufferDirty = true;
+		
 	}
 	
 	public function addTriangles(vertices:DrawData<Float>, indices:DrawData<Int>, uvData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
+		
 		var numVerticesToAdd:Int = Std.int(vertices.length / 2);
 		
 		var numIndexesToAdd:Int = numVerticesToAdd;
@@ -158,10 +162,12 @@ class FlxDrawTrianglesItem extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 		
 		vertexBufferDirty = true;
 		indexBufferDirty = true;
+		
 	}
 	
 	private function ensureElement(vertexPosToAdd:Int, indexPosToAdd:Int):Void
 	{
+		
 		var newBufferLength:Int = vertexPos + vertexPosToAdd;
 		var newIndexesLength:Int = indexPos + indexPosToAdd;
 		
@@ -188,8 +194,9 @@ class FlxDrawTrianglesItem extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 				indexes.set(oldIndexes);
 			}
 		}
+		
 	}
-	
+	*/
 	#else
 	
 	public function addTriangles(vertices:DrawData<Float>, indices:DrawData<Int>, uvData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform):Void {}

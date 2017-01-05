@@ -2,6 +2,7 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -10,6 +11,7 @@ import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
+import openfl.geom.Matrix;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 import openfl.utils.Float32Array;
@@ -21,8 +23,7 @@ import openfl._internal.renderer.opengl.GLRenderer;
  * ...
  * @author ...
  */
-@:access(openfl.display.DisplayObject.__worldTransform)
-class Triangles implements IFlxDestroyable
+class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 {
 	public var texture:FlxGraphic;
 	
@@ -33,7 +34,7 @@ class Triangles implements IFlxDestroyable
 	public var colors(null, set):Array<FlxColor>;
 	public var indices(null, set):Array<Int>;
 	
-	public var shader:FlxShader;
+//	public var shader:FlxShader;
 	
 	public var blendMode:BlendMode;
 	
@@ -48,16 +49,17 @@ class Triangles implements IFlxDestroyable
 	private var indicesBuffer:GLBuffer;
 	
 	private var renderSession:RenderSession;
-	private var parent:DisplayObject;
+	private var worldTransform:Matrix;
 	private var gl:GLRenderContext;
 	private var renderer:GLRenderer;
 	
 	public function new() 
 	{
-		
+		super();
+		type = FlxDrawItemType.TRIANGLES;
 	}
 	
-	public function destroy():Void
+	override public function destroy():Void
 	{
 		verticesArray = null;
 		uvsArray = null;
@@ -66,7 +68,7 @@ class Triangles implements IFlxDestroyable
 		
 		gl = null;
 		renderSession = null;
-		parent = null;
+		worldTransform = null;
 		renderer = null;
 		
 		verticesBuffer = FlxDestroyUtil.destroyBuffer(verticesBuffer);
@@ -78,9 +80,9 @@ class Triangles implements IFlxDestroyable
 		blendMode = null;
 	}
 	
-	public function render(parent:DisplayObject, renderSession:RenderSession):Void
+	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
 	{
-		this.parent = parent;
+		this.worldTransform = worldTransform;
 		this.renderSession = renderSession;
 		this.renderer = cast renderSession.renderer;
 		
@@ -112,7 +114,7 @@ class Triangles implements IFlxDestroyable
 		// TODO: implement it...
 	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
 		
-		var matrix = renderer.getMatrix(parent.__worldTransform);
+		var matrix = renderer.getMatrix(worldTransform);
 		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
 		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
