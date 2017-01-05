@@ -296,12 +296,10 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			colorValue = (Std.int(alpha * 255) & 0xFF) << 24 | tint;
 		}
 		*/
-		colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = colorValue;
-		/*
+	//	colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = colorValue;
+		
 		color.alphaFloat = alpha;
 		colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = color;
-		*/
-	//	trace(colors[i + 2]);
 		
 	//	trace(color.red + "; " + color.green + "; " + color.blue + "; " + color.alpha);
 		
@@ -517,9 +515,9 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 				
 				if (shaderSwap)
 				{
-					trace("shaderSwap");
 					shader = currentShader = nextShader;
 					renderSession.shaderManager.setShader(currentShader);
+					dirty = true;
 					onShaderSwitch();
 				}
 			}
@@ -587,13 +585,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		{
 			var view = positions.subarray(0, currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex);
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, view);
-			
-			trace("elementsPerVertex: " + elementsPerVertex);
-			
-			for (i in 0...12)
-			{
-				trace(positions[i]);
-			}
 		}
 	}
 	
@@ -674,16 +665,10 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	override public function equals(type:FlxDrawItemType, graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Bool
 	{
-		if (graphic != null && textured)
-		{
-			return true;
-		}
-		else if (graphic == null && !textured)
-		{
-			return true;
-		}
-		
-		return false;
+		var hasGraphic:Bool = (graphic != null);
+		var bothHasGraphic:Bool = (hasGraphic == textured);
+		var hasSameShader:Bool = (this.shader == shader);
+		return bothHasGraphic && hasSameShader;
 	}
 	
 	override public function set(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Void 

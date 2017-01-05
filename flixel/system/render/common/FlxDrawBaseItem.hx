@@ -170,8 +170,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	public /*inline*/ function set(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Void
 	{
-		trace("set");
-		
 		this.graphics = graphic;
 		this.colored = colored;
 		this.hasColorOffsets = hasColorOffsets;

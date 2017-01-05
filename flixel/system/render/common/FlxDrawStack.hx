@@ -95,21 +95,17 @@ class FlxDrawStack implements IFlxDestroyable
 	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	{
-		trace("startQuadBatch");
-		
 		var itemToReturn:QuadBatch = null;
 		
 		if (_currentDrawItem != null
 			&& _currentDrawItem.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader)
 			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_headTiles))
 		{	
-			trace("_currentDrawItem != null");
 			return _headTiles;
 		}
 		
 		if (_storageTilesHead != null)
 		{
-			trace("_storageTilesHead != null");
 			itemToReturn = _storageTilesHead;
 			var newHead:QuadBatch = _storageTilesHead.nextTyped;
 			itemToReturn.reset();
@@ -117,7 +113,6 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 		else
 		{
-			trace("new QuadBatch");
 			itemToReturn = new QuadBatch(2000, (graphic != null));
 		}
 		
@@ -137,8 +132,6 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 		
 		_currentDrawItem = itemToReturn;
-		
-		trace((cast _currentDrawItem).textured);
 		
 		return itemToReturn;
 	}
@@ -205,8 +198,6 @@ class FlxDrawStack implements IFlxDestroyable
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
 	{
 		#if FLX_RENDER_GL
-		trace("fillRect");
-		
 		_helperMatrix.identity();
 		var drawItem = startQuadBatch(null, true, false);
 		drawItem.addColorQuad(rect, _helperMatrix, color, alpha);
