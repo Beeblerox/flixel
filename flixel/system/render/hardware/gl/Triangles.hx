@@ -30,14 +30,11 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class TrianglesData implements IFlxDestroyable
 {
-	// TODO: use it...
-	public var batchable:Bool = false;
-	
 	public var textured:Bool = true;
 	
-	public var dirty(default, set):Bool = true;
+	public var numIndices(get, null):Int;
 	
-	public var hasData(get, null):Bool;
+	public var dirty(default, set):Bool = true;
 	
 	public var verticesDirty:Bool = true;
 	public var uvtDirty:Bool = true;
@@ -49,22 +46,14 @@ class TrianglesData implements IFlxDestroyable
 	public var colors(default, set):DrawData<FlxColor>;
 	public var indices(default, set):DrawData<Int>;
 	
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var verticesArray:Float32Array;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var uvsArray:Float32Array;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var colorsArray:UInt32Array;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var indicesArray:UInt16Array;
 	
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var verticesBuffer:GLBuffer;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var uvsBuffer:GLBuffer;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var colorsBuffer:GLBuffer;
-	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var indicesBuffer:GLBuffer;
 	
 	private var gl:GLRenderContext;
@@ -127,15 +116,25 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateVertices():Void
 	{
-		if (verticesDirty && vertices != null)
+		if (vertices == null)
+			return;
+		
+		if (verticesDirty)
 		{
 			if (verticesArray == null || verticesArray.length != vertices.length)
 				verticesArray = new Float32Array(vertices.length);
 			
 			for (i in 0...vertices.length)
 				verticesArray[i] = vertices[i];
-				
+			
+			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, verticesArray, GL.STATIC_DRAW);
 			verticesDirty = false;
+		}
+		else
+		{
+			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
+			GL.bufferSubData(GL.ARRAY_BUFFER, 0, verticesArray);
 		}
 	}
 	
@@ -147,15 +146,24 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateUV():Void
 	{
-		if (uvtDirty && uvs != null)
+		if (uvs == null)
+			return;
+		
+		if (uvtDirty)
 		{
 			if (uvsArray == null || uvsArray.length != uvs.length)
 				uvsArray = new Float32Array(uvs.length);
 			
 			for (i in 0...uvs.length)
 				uvsArray[i] = uvs[i];
-				
+			
+			GL.bindBuffer(GL.ARRAY_BUFFER, uvsBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, uvsArray, GL.STATIC_DRAW);
 			uvtDirty = false;
+		}
+		else
+		{
+			GL.bindBuffer(GL.ARRAY_BUFFER, uvsBuffer);
 		}
 	}
 	
@@ -167,15 +175,27 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateColors():Void
 	{
-		if (colorsDirty && colors != null)
+		// TODO: fix this...
+		
+		if (colors == null)
+			return;
+		
+		if (colorsDirty)
 		{
 			if (colorsArray == null || colorsArray.length != colors.length)
 				colorsArray = new UInt32Array(colors.length);
 			
 			for (i in 0...colors.length)
 				colorsArray[i] = colors[i];
-				
+			
+			// update the colors
+			GL.bindBuffer(GL.ARRAY_BUFFER, colorsBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, colorsArray, GL.STATIC_DRAW);
 			colorsDirty = false;
+		}
+		else
+		{
+			GL.bindBuffer(GL.ARRAY_BUFFER, colorsBuffer);
 		}
 	}
 	
@@ -187,15 +207,25 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateIndices():Void
 	{
-		if (indicesDirty && indices != null)
+		if (indices == null)
+			return;
+		
+		if (indicesDirty)
 		{
 			if (indicesArray == null || indicesArray.length != indices.length)
 				indicesArray = new UInt16Array(indices.length);
 			
 			for (i in 0...indices.length)
 				indicesArray[i] = indices[i];
-				
+			
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesArray, GL.STATIC_DRAW);
 			indicesDirty = false;
+		}
+		else
+		{
+			// dont need to upload!
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
 		}
 	}
 	
@@ -205,14 +235,9 @@ class TrianglesData implements IFlxDestroyable
 		return dirty = value;
 	}
 	
-	private function get_hasData():Bool
+	private function get_numIndices():Int
 	{
-		var result:Bool = (vertices != null && vertices.length >= 6) && (colors != null && colors.length >= 3) && (indices != null && indices.length >= 3);
-		
-		if (textured)
-			result = result && (uvs != null && uvs.length >= 6);
-		
-		return result;
+		return (indicesArray != null) ? indicesArray.length : 0;
 	}
 }
  
@@ -292,56 +317,21 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		
 		this.renderSession.blendModeManager.setBlendMode(blendMode);
 		
-		/*
-		if (data.verticesDirty)
-		{
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
-			GL.bufferSubData(GL.ARRAY_BUFFER, 0, data.verticesArray);
-			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-			data.verticesDirty = false;
-		}
-		*/
+		data.updateVertices();
+		GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
 		
-		if (!data.dirty)
-		{
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
-			GL.bufferSubData(GL.ARRAY_BUFFER, 0, data.verticesArray);
-			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the uvs
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.uvsBuffer);
-			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the colors
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.colorsBuffer);
-			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
-			
-			// dont need to upload!
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, data.indicesBuffer);
-		}
-		else
-		{
-			data.dirty = false;
-			
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, data.verticesArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the uvs
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.uvsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, data.uvsArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the colors
-			GL.bindBuffer(GL.ARRAY_BUFFER, data.colorsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, data.colorsArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
-			
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, data.indicesBuffer);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, data.indicesArray, GL.STATIC_DRAW);
-		}
+		// update the uvs
+		data.updateUV();
+		GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
 		
-		GL.drawElements(GL.TRIANGLES, data.indicesArray.length, GL.UNSIGNED_SHORT, 0);
+		// update the colors
+		data.updateColors();
+		GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+		
+		data.updateIndices();
+		data.dirty = false;
+		
+		GL.drawElements(GL.TRIANGLES, data.numIndices, GL.UNSIGNED_SHORT, 0);
 	}
 	
 	private function setContext(gl:GLRenderContext):Void
