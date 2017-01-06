@@ -162,7 +162,6 @@ class FlxDrawTrianglesItem extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 		
 		vertexBufferDirty = true;
 		indexBufferDirty = true;
-		
 	}
 	
 	private function ensureElement(vertexPosToAdd:Int, indexPosToAdd:Int):Void

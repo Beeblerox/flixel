@@ -2,22 +2,26 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import lime.math.Matrix4;
-import lime.utils.UInt16Array;
-import lime.utils.UInt32Array;
 import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
 import openfl.geom.Matrix;
+
+#if FLX_RENDER_GL
+import lime.math.Matrix4;
+import lime.utils.UInt16Array;
+import lime.utils.UInt32Array;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 import openfl.utils.Float32Array;
-import openfl._internal.renderer.RenderSession;
 import lime.graphics.GLRenderContext;
+import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLRenderer;
+#end
 
 /**
  * ...
@@ -29,12 +33,17 @@ class TrianglesData implements IFlxDestroyable
 	// TODO: use it...
 	public var batchable:Bool = false;
 	
-	public var dirty:Bool = true;
+	public var dirty(default, set):Bool = true;
 	
-	public var vertices(null, set):Array<Float>;
-	public var uvs(null, set):Array<Float>;
-	public var colors(null, set):Array<FlxColor>;
-	public var indices(null, set):Array<Int>;
+	public var verticesDirty:Bool = true;
+	public var uvtDirty:Bool = true;
+	public var colorsDirty:Bool = true;
+	public var indicesDirty:Bool = true;
+	
+	public var vertices(default, set):DrawData<Float>;
+	public var uvs(default, set):DrawData<Float>;
+	public var colors(default, set):DrawData<FlxColor>;
+	public var indices(default, set):DrawData<Int>;
 	
 	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var verticesArray:Float32Array;
@@ -101,72 +110,95 @@ class TrianglesData implements IFlxDestroyable
 		}
 	}
 	
-	private function set_vertices(value:Array<Float>):Array<Float>
+	private function set_vertices(value:DrawData<Float>):DrawData<Float>
 	{
-		if (value == null)
-			return value;
-		
-		if (verticesArray == null || verticesArray.length != value.length)
-			verticesArray = new Float32Array(value.length);
-		
-		for (i in 0...value.length)
-			verticesArray[i] = value[i];
-		
-		return value;
+		verticesDirty = verticesDirty || (value != null);
+		return vertices = value;
 	}
 	
-	private function set_uvs(value:Array<Float>):Array<Float>
+	public function updateVertices():Void
 	{
-		if (value == null)
-			return value;
-		
-		if (uvsArray == null || uvsArray.length != value.length)
-			uvsArray = new Float32Array(value.length);
-		
-		for (i in 0...value.length)
-			uvsArray[i] = value[i];
-		
-		dirty = true;
-		return value;
+		if (verticesDirty && vertices != null)
+		{
+			if (verticesArray == null || verticesArray.length != vertices.length)
+				verticesArray = new Float32Array(vertices.length);
+			
+			for (i in 0...vertices.length)
+				verticesArray[i] = vertices[i];
+				
+			verticesDirty = false;
+		}
 	}
 	
-	private function set_colors(value:Array<FlxColor>):Array<FlxColor>
+	private function set_uvs(value:DrawData<Float>):DrawData<Float>
 	{
-		if (value == null)
-			return value;
-		
-		if (colorsArray == null || colorsArray.length != value.length)
-			colorsArray = new UInt32Array(value.length);
-		
-		for (i in 0...value.length)
-			verticesArray[i] = value[i];
-		
-		dirty = true;
-		return value;
+		uvtDirty = uvtDirty || (value != null);
+		return uvs = value;
 	}
 	
-	private function set_indices(value:Array<Int>):Array<Int>
+	public function updateUV():Void
 	{
-		if (value == null)
-			return value;
-		
-		if (indicesArray == null || indicesArray.length != value.length)
-			indicesArray = new UInt16Array(value.length);
-		
-		for (i in 0...value.length)
-			indicesArray[i] = value[i];
-		
-		dirty = true;
-		return value;
+		if (uvtDirty && uvs != null)
+		{
+			if (uvsArray == null || uvsArray.length != uvs.length)
+				uvsArray = new Float32Array(uvs.length);
+			
+			for (i in 0...uvs.length)
+				uvsArray[i] = uvs[i];
+				
+			uvtDirty = false;
+		}
+	}
+	
+	private function set_colors(value:DrawData<FlxColor>):DrawData<FlxColor>
+	{
+		colorsDirty = colorsDirty || (value != null);
+		return colors = value;
+	}
+	
+	public function updateColors():Void
+	{
+		if (colorsDirty && colors != null)
+		{
+			if (colorsArray == null || colorsArray.length != colors.length)
+				colorsArray = new UInt32Array(colors.length);
+			
+			for (i in 0...colors.length)
+				colorsArray[i] = colors[i];
+				
+			colorsDirty = false;
+		}
+	}
+	
+	private function set_indices(value:DrawData<Int>):DrawData<Int>
+	{
+		indicesDirty = indicesDirty || (value != null);
+		return indices = value;
+	}
+	
+	public function updateIndices():Void
+	{
+		if (indicesDirty && indices != null)
+		{
+			if (indicesArray == null || indicesArray.length != indices.length)
+				indicesArray = new UInt16Array(indices.length);
+			
+			for (i in 0...indices.length)
+				indicesArray[i] = indices[i];
+				
+			indicesDirty = false;
+		}
+	}
+	
+	private function set_dirty(value:Bool):Bool
+	{
+		verticesDirty = uvtDirty = colorsDirty = indicesDirty = value;
+		return dirty = value;
 	}
 }
  
 class Triangles extends FlxDrawHardwareItem<Triangles>
 {
-	public var texture:FlxGraphic;
-	
-//	public var shader:FlxShader;
-	
 	public var blendMode:BlendMode;
 	
 	#if !flash
@@ -227,7 +259,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	#end
 	{
 		GL.activeTexture(GL.TEXTURE0);
-		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(renderSession.gl));
+		GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
 		
 		// set uniforms
 		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
@@ -240,6 +272,16 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		this.renderSession.blendModeManager.setBlendMode(blendMode);
+		
+		/*
+		if (data.verticesDirty)
+		{
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
+			GL.bufferSubData(GL.ARRAY_BUFFER, 0, data.verticesArray);
+			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
+			data.verticesDirty = false;
+		}
+		*/
 		
 		if (!data.dirty)
 		{
