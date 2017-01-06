@@ -37,31 +37,29 @@ class FlxDrawStack implements IFlxDestroyable
 	private var _currentDrawItem:FlxDrawBaseItem<Dynamic>;
 	
 	/**
-	 * An array of all draw items in stack
+	 * Pointer to head of stack with draw items
 	 */
-	private var _drawItems:Array<FlxDrawBaseItem<Dynamic>> = [];
-	
-	/**
-	 * The number of draw items in stack
-	 */
-	private var _numItems:Int = 0;
-	
+	private var _headOfDrawStack:FlxDrawBaseItem<Dynamic>;
 	/**
 	 * Last draw tiles item
 	 */
-	private var _lastTiles:QuadBatch;
-	
+	private var _headTiles:QuadBatch;
 	/**
-	 * An array of all tiles items in stack
+	 * Last draw triangles item
 	 */
-	private var _tiles:QuadBatch;
+	private var _headTriangles:Triangles;
 	
 	public var view:FlxHardwareView;
 	
 	/**
 	 * Draw tiles stack items that can be reused
 	 */
-	private static var _tileStorage:QuadBatch;
+	private static var _storageTilesHead:QuadBatch;
+	
+	/**
+	 * Draw triangles stack items that can be reused
+	 */
+	private static var _storageTrianglesHead:Triangles;
 	
 	private var _helperMatrix:FlxMatrix = new FlxMatrix();
 	
@@ -72,15 +70,16 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	public function destroy():Void
 	{
+		destroyDrawStackItems();
 		_helperMatrix = null;
 		view = null;
-		
-		_drawItems = null;
-		
-		destroyDrawItemsChain(_tiles);
-		
-		_currentDrawItem = null;
-		_lastTiles = null;
+	}
+	
+	private function destroyDrawStackItems():Void
+	{
+		destroyDrawItemsChain(_headOfDrawStack);
+		destroyDrawItemsChain(_storageTilesHead);
+		destroyDrawItemsChain(_storageTrianglesHead);
 	}
 	
 	private function destroyDrawItemsChain(item:FlxDrawBaseItem<Dynamic>):Void
@@ -104,17 +103,17 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		if (_currentDrawItem != null
 			&& _currentDrawItem.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader)
-			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_lastTiles))
+			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_headTiles))
 		{
-			return _lastTiles;
+			return _headTiles;
 		}
 		
-		if (_tileStorage != null)
+		if (_storageTilesHead != null)
 		{
-			itemToReturn = _tileStorage;
-			var newHead:QuadBatch = _tileStorage.next;
+			itemToReturn = _storageTilesHead;
+			var newHead:QuadBatch = _storageTilesHead.nextTyped;
 			itemToReturn.reset();
-			_tileStorage = newHead;
+			_storageTilesHead = newHead;
 		}
 		else
 		{
@@ -123,20 +122,21 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		itemToReturn.set(graphic, colored, hasColorOffsets, blend, smooth, shader);
 		
-		_drawItems[_numItems] = itemToReturn;
-		_numItems++;
+		itemToReturn.nextTyped = _headTiles;
+		_headTiles = itemToReturn;
 		
-		if (_tiles == null)
+		if (_headOfDrawStack == null)
 		{
-			_tiles = itemToReturn;
-		}
-		else
-		{
-			_lastTiles.next = itemToReturn;
+			_headOfDrawStack = itemToReturn;
 		}
 		
-		_lastTiles = itemToReturn;
+		if (_currentDrawItem != null)
+		{
+			_currentDrawItem.next = itemToReturn;
+		}
+		
 		_currentDrawItem = itemToReturn;
+		
 		return itemToReturn;
 	}
 	/*
@@ -202,9 +202,11 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	public function addTriangles(item:Triangles, ?matrix:FlxMatrix):Void
 	{
+		/*
 		_currentDrawItem = item;
 		_drawItems[_numItems] = item;
 		_numItems++;
+		*/
 	}
 	
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
@@ -225,30 +227,43 @@ class FlxDrawStack implements IFlxDestroyable
 	@:noCompletion
 	public function clearDrawStack():Void
 	{	
-		var currTiles:QuadBatch = _tiles;
+		var currTiles:QuadBatch = _headTiles;
 		var newTilesHead:QuadBatch;
 		
 		while (currTiles != null)
 		{
-			newTilesHead = currTiles.next;
+			newTilesHead = currTiles.nextTyped;
 			currTiles.reset();
-			currTiles.next = _tileStorage;
-			_tileStorage = currTiles;
+			currTiles.nextTyped = _storageTilesHead;
+			_storageTilesHead = currTiles;
 			currTiles = newTilesHead;
 		}
 		
-		_tiles = null;
-		_lastTiles = null;
+		var currTriangles:Triangles = _headTriangles;
+		var newTrianglesHead:Triangles;
+		
+		while (currTriangles != null)
+		{
+			newTrianglesHead = currTriangles.nextTyped;
+			currTriangles.reset();
+			currTriangles.nextTyped = _storageTrianglesHead;
+			_storageTrianglesHead = currTriangles;
+			currTriangles = newTrianglesHead;
+		}
+		
 		_currentDrawItem = null;
-		_numItems = 0;
+		_headOfDrawStack = null;
+		_headTiles = null;
+		_headTriangles = null;
 	}
 	
 	public function render():Void
 	{
-		for (i in 0..._numItems)
+		var currItem:FlxDrawBaseItem<Dynamic> = _headOfDrawStack;
+		while (currItem != null)
 		{
-			var currItem:FlxDrawBaseItem<Dynamic> = _drawItems[i];
 			currItem.render(view);
+			currItem = currItem.next;
 		}
 	}
 	

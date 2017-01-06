@@ -86,7 +86,9 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		*/
 	}
 	
-	public var next:T;
+	public var nextTyped:T;
+	
+	public var next:FlxDrawBaseItem<T>;
 	
 	public var graphics:FlxGraphic;
 	public var antialiasing:Bool = false;
@@ -122,6 +124,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		colored = false;
 		blending = null;
 		shader = null;
+		nextTyped = null;
 		next = null;
 		
 		redOffset = 0.0;
@@ -136,6 +139,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		blending = null;
 		shader = null;
 		next = null;
+		nextTyped = null;
 		type = null;
 	}
 	

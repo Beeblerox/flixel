@@ -26,6 +26,9 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class TrianglesData implements IFlxDestroyable
 {
+	// TODO: use it...
+	public var batchable:Bool = false;
+	
 	public var dirty:Bool = true;
 	
 	public var vertices(null, set):Array<Float>;
@@ -158,7 +161,7 @@ class TrianglesData implements IFlxDestroyable
 	}
 }
  
-class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
+class Triangles extends FlxDrawHardwareItem<Triangles>
 {
 	public var texture:FlxGraphic;
 	
