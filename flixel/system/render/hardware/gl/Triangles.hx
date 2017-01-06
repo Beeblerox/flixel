@@ -33,7 +33,11 @@ class TrianglesData implements IFlxDestroyable
 	// TODO: use it...
 	public var batchable:Bool = false;
 	
+	public var textured:Bool = true;
+	
 	public var dirty(default, set):Bool = true;
+	
+	public var hasData(get, null):Bool;
 	
 	public var verticesDirty:Bool = true;
 	public var uvtDirty:Bool = true;
@@ -65,14 +69,19 @@ class TrianglesData implements IFlxDestroyable
 	
 	private var gl:GLRenderContext;
 	
-	public function new()
+	public function new(textured:Bool = true)
 	{
-		
+		this.textured = textured;
 	}
 	
 	public function destroy():Void
 	{
 		gl = null;
+		
+		vertices = null;
+		uvs = null;
+		colors = null;
+		indices = null;
 		
 		verticesArray = null;
 		uvsArray = null;
@@ -194,6 +203,16 @@ class TrianglesData implements IFlxDestroyable
 	{
 		verticesDirty = uvtDirty = colorsDirty = indicesDirty = value;
 		return dirty = value;
+	}
+	
+	private function get_hasData():Bool
+	{
+		var result:Bool = (vertices != null && vertices.length >= 6) && (colors != null && colors.length >= 3) && (indices != null && indices.length >= 3);
+		
+		if (textured)
+			result = result && (uvs != null && uvs.length >= 6);
+		
+		return result;
 	}
 }
  
