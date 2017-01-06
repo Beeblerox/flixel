@@ -2,6 +2,8 @@ package flixel;
 
 import flixel.math.FlxRect;
 import flixel.system.render.common.DrawItem.DrawData;
+import flixel.system.render.hardware.gl.Triangles.TrianglesData;
+import flixel.util.FlxDestroyUtil;
 
 /**
  * A very basic rendering component which uses drawTriangles.
@@ -42,11 +44,22 @@ class FlxStrip extends FlxSprite
 	
 	private var bounds:FlxRect = FlxRect.get();
 	
+	private var data:TrianglesData;
+	
+	public function new()
+	{
+		super();
+		
+		data = new TrianglesData();
+	}
+	
 	override public function destroy():Void 
 	{
 		vertices = null;
 		indices = null;
 		uvtData = null;
+		
+		data = FlxDestroyUtil.destroy(data);
 		
 		super.destroy();
 	}

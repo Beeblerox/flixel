@@ -23,10 +23,9 @@ import openfl._internal.renderer.opengl.GLRenderer;
  * ...
  * @author ...
  */
-class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
+
+class TrianglesData implements IFlxDestroyable
 {
-	public var texture:FlxGraphic;
-	
 	public var dirty:Bool = true;
 	
 	public var vertices(null, set):Array<Float>;
@@ -34,136 +33,47 @@ class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 	public var colors(null, set):Array<FlxColor>;
 	public var indices(null, set):Array<Int>;
 	
-//	public var shader:FlxShader;
-	
-	public var blendMode:BlendMode;
-	
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var verticesArray:Float32Array;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var uvsArray:Float32Array;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var colorsArray:UInt32Array;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var indicesArray:UInt16Array;
 	
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var verticesBuffer:GLBuffer;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var uvsBuffer:GLBuffer;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var colorsBuffer:GLBuffer;
+	@:allow(flixel.system.render.hardware.gl.Triangles)
 	private var indicesBuffer:GLBuffer;
 	
-	private var renderSession:RenderSession;
-	private var worldTransform:Matrix;
 	private var gl:GLRenderContext;
-	private var renderer:GLRenderer;
 	
-	public function new() 
+	public function new()
 	{
-		super();
-		type = FlxDrawItemType.TRIANGLES;
+		
 	}
 	
-	override public function destroy():Void
+	public function destroy():Void
 	{
+		gl = null;
+		
 		verticesArray = null;
 		uvsArray = null;
 		colorsArray = null;
 		indicesArray = null;
 		
-		gl = null;
-		renderSession = null;
-		worldTransform = null;
-		renderer = null;
-		
 		verticesBuffer = FlxDestroyUtil.destroyBuffer(verticesBuffer);
 		uvsBuffer = FlxDestroyUtil.destroyBuffer(uvsBuffer);
 		colorsBuffer = FlxDestroyUtil.destroyBuffer(colorsBuffer);
 		indicesBuffer = FlxDestroyUtil.destroyBuffer(indicesBuffer);
-		
-		shader = null;
-		blendMode = null;
 	}
 	
-	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
-	{
-		this.worldTransform = worldTransform;
-		this.renderSession = renderSession;
-		this.renderer = cast renderSession.renderer;
-		
-		// TODO: implement it...
-		// renderSession.spriteBatch.stop();
-		
-		// init! init!
-		setContext(renderSession.gl);
-		
-		// TODO: implement special strip shader with colors on and off...
-		renderSession.shaderManager.setShader(shader);
-		
-		renderStrip(renderSession);
-		
-		// TODO: implement it???
-		///renderSession.shaderManager.activateDefaultShader();
-		
-		// TODO: implement it...
-	//	renderSession.spriteBatch.start();
-	}
-	
-	private function renderStrip(renderSession:RenderSession):Void
-	{
-		GL.activeTexture(GL.TEXTURE0);
-		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
-		
-		// set uniforms
-		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
-		// TODO: implement it...
-	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
-		
-		var matrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
-		
-		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
-		
-		this.renderSession.blendModeManager.setBlendMode(blendMode);
-		
-		if (!dirty)
-		{
-			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
-			GL.bufferSubData(GL.ARRAY_BUFFER, 0, verticesArray);
-			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the uvs
-			GL.bindBuffer(gl.ARRAY_BUFFER, uvsBuffer);
-			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the colors
-			GL.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
-			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
-			
-			// dont need to upload!
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-		}
-		else
-		{
-			dirty = false;
-			
-			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, verticesArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the uvs
-			GL.bindBuffer(GL.ARRAY_BUFFER, uvsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, uvsArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
-			
-			// update the colors
-			GL.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, colorsArray, GL.STATIC_DRAW);
-			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
-			
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesArray, GL.STATIC_DRAW);
-		}
-		
-		GL.drawElements(GL.TRIANGLES, indicesArray.length, GL.UNSIGNED_SHORT, 0);
-	}
-	
-	private function setContext(gl:GLRenderContext):Void
+	public function setContext(gl:GLRenderContext):Void
 	{
 		if (this.gl == null || this.gl != gl)
 		{
@@ -225,19 +135,8 @@ class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 		if (colorsArray == null || colorsArray.length != value.length)
 			colorsArray = new UInt32Array(value.length);
 		
-		var tint = 0xFFFFFF, color = 0xFFFFFFFF;
-		var vertexColor:FlxColor;
-		
 		for (i in 0...value.length)
-		{
-			/*
-			vertexColor = value[i];
-			tint = vertexColor.red << 16 | vertexColor.green * 255 << 8 | vertexColor.blue * 255;
-			color = (vertexColor.alpha * 255 & 0xFF) << 24 | tint;
-			*/
-			
 			verticesArray[i] = value[i];
-		}
 		
 		dirty = true;
 		return value;
@@ -257,4 +156,135 @@ class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
 		dirty = true;
 		return value;
 	}
+}
+ 
+class Triangles extends FlxDrawHardwareItem<FlxDrawTrianglesItem>
+{
+	public var texture:FlxGraphic;
+	
+//	public var shader:FlxShader;
+	
+	public var blendMode:BlendMode;
+	
+	#if !flash
+	private var renderSession:RenderSession;
+	#end
+	
+	private var worldTransform:Matrix;
+	private var renderer:GLRenderer;
+	
+	public var data:TrianglesData;
+	
+	/**
+	 * Transformation matrix for this item on camera.
+	 */
+	public var matrix:Matrix;
+	
+	public function new() 
+	{
+		super();
+		type = FlxDrawItemType.TRIANGLES;
+	}
+	
+	override public function destroy():Void
+	{
+		renderSession = null;
+		worldTransform = null;
+		renderer = null;
+		
+		shader = null;
+		blendMode = null;
+		
+		data = null;
+	}
+	
+	#if flash
+	override public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void
+	#else
+	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
+	#end
+	{
+		this.worldTransform = worldTransform;
+		this.renderSession = renderSession;
+		this.renderer = cast renderSession.renderer;
+		
+		// init! init!
+		setContext(renderSession.gl);
+		
+		// TODO: implement special strip shader with colors on and off...
+		renderSession.shaderManager.setShader(shader);
+		
+		renderStrip(renderSession);
+	}
+	
+	#if flash
+	private function renderStrip(renderSession:Dynamic):Void
+	#else
+	private function renderStrip(renderSession:RenderSession):Void
+	#end
+	{
+		GL.activeTexture(GL.TEXTURE0);
+		GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(renderSession.gl));
+		
+		// set uniforms
+		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
+		// TODO: implement it...
+	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
+		
+		var matrix = renderer.getMatrix(worldTransform);
+		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
+		
+		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
+		
+		this.renderSession.blendModeManager.setBlendMode(blendMode);
+		
+		if (!data.dirty)
+		{
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
+			GL.bufferSubData(GL.ARRAY_BUFFER, 0, data.verticesArray);
+			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
+			
+			// update the uvs
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.uvsBuffer);
+			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
+			
+			// update the colors
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.colorsBuffer);
+			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+			
+			// dont need to upload!
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, data.indicesBuffer);
+		}
+		else
+		{
+			data.dirty = false;
+			
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.verticesBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, data.verticesArray, GL.STATIC_DRAW);
+			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
+			
+			// update the uvs
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.uvsBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, data.uvsArray, GL.STATIC_DRAW);
+			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
+			
+			// update the colors
+			GL.bindBuffer(GL.ARRAY_BUFFER, data.colorsBuffer);
+			GL.bufferData(GL.ARRAY_BUFFER, data.colorsArray, GL.STATIC_DRAW);
+			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+			
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, data.indicesBuffer);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, data.indicesArray, GL.STATIC_DRAW);
+		}
+		
+		GL.drawElements(GL.TRIANGLES, data.indicesArray.length, GL.UNSIGNED_SHORT, 0);
+	}
+	
+	private function setContext(gl:GLRenderContext):Void
+	{
+		if (data != null)
+			data.setContext(gl);
+	}
+	
+	
 }

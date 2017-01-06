@@ -65,6 +65,23 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	 */
 	private static var uColorOffset:Array<Float> = [];
 	
+	
+	/**
+	 * Current texture being used by batch.
+	 */
+	
+	// TODO: use these 2 vars for less state switches on gpu...
+	private static var prevTexture:FlxGraphic;
+	
+	private static var prevShader:FlxGraphic;
+	
+	// TODO: use this method...
+	public static function resetState():Void
+	{
+		prevTexture = null;
+		prevShader = null;
+	}
+	
 	public var roundPixels:Bool = false;
 	
 	public var textured:Bool;
@@ -99,17 +116,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	 */
 	public var currentBatchSize(default, null):Int = 0;
 	
-	/**
-	 * Current texture being used by batch.
-	 */
-	private var currentTexture:FlxGraphic;
-	
-	// TODO: use this var...
-	/**
-	 * Current shader used by batch.
-	 */
-	private var currentShader:FlxShader;
-	
 	private var dirty:Bool = true;
 	
 	/**
@@ -120,15 +126,17 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	private var vertexBuffer:GLBuffer;
 	private var indexBuffer:GLBuffer;
 	
+	#if flash
+	private var renderSession:Dynamic;
+	#else
 	private var renderSession:RenderSession;
+	#end
 	
 	private var worldTransform:Matrix;
 	
 	private var gl:GLRenderContext;
 	
 	private var renderer:GLRenderer;
-	
-//	private var shader:FlxShader;
 	
 	public function new(size:Int = 2000, textured:Bool) 
 	{
@@ -206,7 +214,11 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		}
 	}
 	
+	#if flash
+	override public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void
+	#else
 	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
+	#end
 	{
 		setContext(renderSession.gl);
 		
@@ -304,17 +316,17 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	//	trace(color.red + "; " + color.green + "; " + color.blue + "; " + color.alpha);
 		
 		var state:RenderState = states[currentBatchSize];
-		state.set(null, null, blend, false, shader);
+		state.set(null, null, blend, false);
 		
 		currentBatchSize++;
 	}
 	
-	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
+	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
-		addUVQuad(frame.parent, frame.frame, frame.uv, matrix, transform, blend, smoothing, shader);
+		addUVQuad(frame.parent, frame.frame, frame.uv, matrix, transform, blend, smoothing);
 	}
 	
-	override public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
+	override public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
 		/*
 		// check texture..
@@ -412,7 +424,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		colors[i + 4] = colors[i + 9] = colors[i + 14] = colors[i + 19] = color;
 		
 		var state:RenderState = states[currentBatchSize];
-		state.set(texture, transform, blend, smoothing, shader);
+		state.set(texture, transform, blend, smoothing);
 		
 		currentBatchSize++;
 	}
@@ -427,12 +439,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		var state:RenderState = states[0];
 		
-		var currentShader:FlxShader;
-		var nextShader:FlxShader;
-		
-		shader = currentShader = nextShader = getStateShader(state);
-		renderSession.shaderManager.setShader(currentShader);
-		
+		shader = getShader();
+		renderSession.shaderManager.setShader(shader);
 		onShaderSwitch();
 		
 		var currentTexture:FlxGraphic;
@@ -462,7 +470,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		uColorOffset[0] = uColorOffset[1] = uColorOffset[2] = uColorOffset[3] = 0.0;
 		
 		var blendSwap:Bool = false;
-		var shaderSwap:Bool = false;
 		var colorOffsetSwap:Bool = false;
 		var textureSwap:Bool = false;
 		
@@ -471,10 +478,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			state = states[i];
 			
 			nextTexture = state.texture;
-			
 			nextBlendMode = state.blend;
-			
-			nextShader = getStateShader(state);
 			
 			nextRedOffset = state.redOffset;
 			nextGreenOffset = state.greenOffset;
@@ -482,11 +486,10 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			nextAlphaOffset = state.alphaOffset;
 			
 			blendSwap = (currentBlendMode != nextBlendMode);
-			shaderSwap = (currentShader != nextShader);
 			colorOffsetSwap = (currentRedOffset != nextRedOffset || currentGreenOffset != nextGreenOffset || currentBlueOffset != nextBlueOffset || currentAlphaOffset != nextAlphaOffset);
 			textureSwap = (currentTexture != nextTexture);
 			
-			if (textureSwap || blendSwap || shaderSwap || colorOffsetSwap)
+			if (textureSwap || blendSwap || colorOffsetSwap)
 			{
 				renderBatch(currentTexture, batchSize, startIndex);
 				
@@ -512,14 +515,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 					uColorOffset[2] = currentBlueOffset;
 					uColorOffset[3] = currentAlphaOffset;
 				}
-				
-				if (shaderSwap)
-				{
-					shader = currentShader = nextShader;
-					renderSession.shaderManager.setShader(currentShader);
-					dirty = true;
-					onShaderSwitch();
-				}
 			}
 			
 			batchSize++;
@@ -531,10 +526,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		currentBatchSize = 0;
 	}
 	
-	private inline function getStateShader(state:RenderState):FlxShader
+	private inline function getShader():FlxShader
 	{
-		var shader:FlxShader = state.shader;
-		
 		if (shader == null)
 		{
 			if (textured)
@@ -668,6 +661,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		var hasGraphic:Bool = (graphic != null);
 		var bothHasGraphic:Bool = (hasGraphic == textured);
 		var hasSameShader:Bool = (this.shader == shader);
+		
 		return bothHasGraphic && hasSameShader;
 	}
 	
@@ -689,7 +683,6 @@ class RenderState implements IFlxDestroyable
 	public var blend:BlendMode;
 	public var smoothing:Bool;
 	public var texture:FlxGraphic;
-	public var shader:FlxShader;
 	
 	public var redOffset:Float;
 	public var greenOffset:Float;
@@ -701,12 +694,11 @@ class RenderState implements IFlxDestroyable
 	
 	public function new() {}
 	
-	public inline function set(texture:FlxGraphic, color:ColorTransform, blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Void
+	public inline function set(texture:FlxGraphic, color:ColorTransform, blend:BlendMode, smooth:Bool = false):Void
 	{
 		this.texture = texture;
 		this.smoothing = smooth;
 		this.blend = blend;
-		this.shader = shader;
 		
 		if (color != null)
 		{
@@ -728,7 +720,6 @@ class RenderState implements IFlxDestroyable
 	{
 		this.texture = null;
 		this.blend = null;
-		this.shader = null;
 	}
 	
 }

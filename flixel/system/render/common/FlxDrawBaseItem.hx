@@ -86,9 +86,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		*/
 	}
 	
-	public var nextTyped:T;
-	
-	public var next:FlxDrawBaseItem<T>;
+	public var next:T;
 	
 	public var graphics:FlxGraphic;
 	public var antialiasing:Bool = false;
@@ -124,7 +122,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		colored = false;
 		blending = null;
 		shader = null;
-		nextTyped = null;
 		next = null;
 		
 		redOffset = 0.0;
@@ -140,17 +137,20 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		shader = null;
 		next = null;
 		type = null;
-		nextTyped = null;
 	}
 	
 	public function render(view:FlxHardwareView):Void { }
 	
+	#if flash
+	public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void { }
+	#else
 	public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void { }
+	#end
 	
-	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void {}
+	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void {}
 //	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
 	
-	public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void {}
+	public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void {}
 //	public function addUVQuad(rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform):Void {}
 	
 	public function equals(type:FlxDrawItemType, graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
