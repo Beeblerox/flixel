@@ -175,7 +175,7 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateColors():Void
 	{
-		// TODO: fix this...
+		// TODO: check this and fix this...
 		
 		if (colors == null)
 			return;
@@ -291,6 +291,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		setContext(renderSession.gl);
 		
 		// TODO: implement special strip shader with colors on and off...
+		// TODO: and with texture and without...
 		renderSession.shaderManager.setShader(shader);
 		
 		renderStrip(renderSession);
@@ -302,8 +303,16 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	private function renderStrip(renderSession:RenderSession):Void
 	#end
 	{
-		GL.activeTexture(GL.TEXTURE0);
-		GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
+		if (graphics != null)
+		{
+			GL.activeTexture(GL.TEXTURE0);
+			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
+		}
+		else
+		{
+			GL.activeTexture(GL.TEXTURE0);
+			GL.bindTexture(GL.TEXTURE_2D, null);
+		}
 		
 		// set uniforms
 		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
@@ -320,18 +329,30 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		data.updateVertices();
 		GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
 		
-		// update the uvs
-		data.updateUV();
-		GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
+		if (graphics != null)
+		{
+			// update the uvs
+			data.updateUV();
+			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, 0, 0);
+		}
 		
-		// update the colors
-		data.updateColors();
-		GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+		if (colored)
+		{
+			// update the colors
+			data.updateColors();
+			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, 0, 0);
+		}
 		
 		data.updateIndices();
 		data.dirty = false;
 		
 		GL.drawElements(GL.TRIANGLES, data.numIndices, GL.UNSIGNED_SHORT, 0);
+	}
+	
+	override public function reset():Void 
+	{
+		super.reset();
+		data = null;
 	}
 	
 	private function setContext(gl:GLRenderContext):Void

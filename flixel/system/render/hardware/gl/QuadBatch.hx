@@ -164,11 +164,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			this.indices[indexPos + 0] = index + 0;
 			this.indices[indexPos + 1] = index + 1;
 			this.indices[indexPos + 2] = index + 2;
-			/*
-			this.indices[indexPos + 3] = index + 0;
-			this.indices[indexPos + 4] = index + 2;
-			this.indices[indexPos + 5] = index + 3;
-			*/
 			this.indices[indexPos + 3] = index + 1;
 			this.indices[indexPos + 4] = index + 3;
 			this.indices[indexPos + 5] = index + 2;
@@ -300,20 +295,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			positions[i + 10] = w * b + h * d + ty;
 		}
 		
-		var tint = 0xFFFFFF, colorValue = 0xFFFFFFFF;
-		/*
-		if (transform != null)
-		{
-			tint = color.red << 16 | color.green << 8 | color.blue;
-			colorValue = (Std.int(alpha * 255) & 0xFF) << 24 | tint;
-		}
-		*/
-	//	colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = colorValue;
-		
 		color.alphaFloat = alpha;
 		colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = color;
-		
-	//	trace(color.red + "; " + color.green + "; " + color.blue + "; " + color.alpha);
 		
 		var state:RenderState = states[currentBatchSize];
 		state.set(null, null, blend, false);
