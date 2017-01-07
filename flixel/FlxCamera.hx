@@ -15,6 +15,7 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.FlxCameraView;
 import flixel.system.render.blit.FlxBlitView;
 import flixel.system.render.hardware.FlxHardwareView;
+import flixel.system.render.hardware.gl.Triangles.TrianglesData;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -310,12 +311,11 @@ class FlxCamera extends FlxBasic
 	
 	// TODO: bring back colors array parameter???
 	// TODO: remove repeat parameter, since it's always on...
-	public inline function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>,
-		uvtData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
+	public inline function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void 
 	{
 		if (view != null)
-			view.drawTriangles(graphic, vertices, indices, uvtData, matrix, transform, blend, repeat, smoothing, shader);
+			view.drawTriangles(graphic, data, matrix, transform, blend, repeat, smoothing, shader);
 	}
 	
 	public inline function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,

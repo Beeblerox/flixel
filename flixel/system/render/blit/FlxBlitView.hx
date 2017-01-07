@@ -8,6 +8,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.FlxCameraView;
+import flixel.system.render.hardware.gl.Triangles.TrianglesData;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
@@ -160,17 +161,16 @@ class FlxBlitView extends FlxCameraView
 		}
 	}
 	
-	override public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>,
-		uvtData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
+	override public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = false, smoothing:Bool = false, ?shader:FlxShader):Void 
 	{
 		trianglesSprite.graphics.clear();
 		trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, repeat, smoothing);
-		trianglesSprite.graphics.drawTriangles(vertices, indices, uvtData);
+		trianglesSprite.graphics.drawTriangles(data.vertices, data.indices, data.uvs);
 		trianglesSprite.graphics.endFill();
 		buffer.draw(trianglesSprite, matrix, transform, blend);
 		
-		drawDebugTriangles(vertices, indices, matrix);
+		drawDebugTriangles(data.vertices, data.indices, matrix);
 	}
 	
 	override public function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,

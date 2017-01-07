@@ -1,8 +1,10 @@
 package flixel;
 
 import flixel.math.FlxRect;
+import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.hardware.gl.Triangles.TrianglesData;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 
 /**
@@ -25,15 +27,17 @@ class FlxStrip extends FlxSprite
 	/**
 	 * A Vector of Floats where each pair of numbers is treated as a coordinate location (an x, y pair).
 	 */
-	public var vertices:DrawData<Float> = new DrawData<Float>();
+	public var vertices(get, set):DrawData<Float>;
 	/**
 	 * A Vector of integers or indexes, where every three indexes define a triangle.
 	 */
-	public var indices:DrawData<Int> = new DrawData<Int>();
+	public var indices(get, set):DrawData<Int>;
 	/**
 	 * A Vector of normalized coordinates used to apply texture mapping.
 	 */
-	public var uvtData:DrawData<Float> = new DrawData<Float>();
+	public var uvtData(get, set):DrawData<Float>;
+	
+	public var colors(get, set):DrawData<FlxColor>;
 	
 	public var repeat:Bool = true;
 	
@@ -46,19 +50,15 @@ class FlxStrip extends FlxSprite
 	
 	private var data:TrianglesData;
 	
-	public function new()
+	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
 	{
-		super();
+		super(X, Y, SimpleGraphic);
 		
 		data = new TrianglesData();
 	}
 	
 	override public function destroy():Void 
 	{
-		vertices = null;
-		indices = null;
-		uvtData = null;
-		
 		data = FlxDestroyUtil.destroy(data);
 		
 		super.destroy();
@@ -67,9 +67,7 @@ class FlxStrip extends FlxSprite
 	override public function draw():Void 
 	{
 		if (alpha == 0 || graphic == null || vertices == null)
-		{
 			return;
-		}
 		
 		if (dirty && vertices.length >= 6)
 		{
@@ -94,6 +92,8 @@ class FlxStrip extends FlxSprite
 			
 			getScreenPosition(_point, camera);
 			
+			// TODO: not only translate bounds rectangle, 
+			// but also scale and rotate it for correct visibility check...
 			bounds.offset(_point.x, _point.y);
 			
 			if (camera.view.bounds.overlaps(bounds))
@@ -111,10 +111,50 @@ class FlxStrip extends FlxSprite
 				_matrix.translate(origin.x, origin.y);
 				_matrix.translate(_point.x, _point.y);
 				
-				camera.drawTriangles(graphic, vertices, indices, uvtData, _matrix, colorTransform, blend, repeat, antialiasing);
+				camera.drawTriangles(graphic, data, _matrix, colorTransform, blend, repeat, antialiasing);
 			}
 			
 			bounds.offset( -_point.x, -_point.y);
 		}
+	}
+	
+	private function get_vertices():DrawData<Float>
+	{
+		return data.vertices;
+	}
+	
+	private function set_vertices(value:DrawData<Float>):DrawData<Float>
+	{
+		return data.vertices = value;
+	}
+	
+	private function get_indices():DrawData<Int>
+	{
+		return data.indices;
+	}
+	
+	private function set_indices(value:DrawData<Int>):DrawData<Int>
+	{
+		return data.indices = value;
+	}
+	
+	private function get_uvtData():DrawData<Float>
+	{
+		return data.uvs;
+	}
+	
+	private function set_uvtData(value:DrawData<Float>):DrawData<Float>
+	{
+		return data.uvs = value;
+	}
+	
+	private function get_colors():DrawData<FlxColor>
+	{
+		return data.colors;
+	}
+	
+	private function set_colors(value:DrawData<FlxColor>):DrawData<FlxColor>
+	{
+		return data.colors = value;
 	}
 }

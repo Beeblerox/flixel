@@ -1,6 +1,7 @@
 package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.shaders.FlxTexturedTrianglesShader;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
@@ -30,8 +31,6 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class TrianglesData implements IFlxDestroyable
 {
-	public var textured:Bool = true;
-	
 	public var numIndices(get, null):Int;
 	
 	public var dirty(default, set):Bool = true;
@@ -41,10 +40,10 @@ class TrianglesData implements IFlxDestroyable
 	public var colorsDirty:Bool = true;
 	public var indicesDirty:Bool = true;
 	
-	public var vertices(default, set):DrawData<Float>;
-	public var uvs(default, set):DrawData<Float>;
-	public var colors(default, set):DrawData<FlxColor>;
-	public var indices(default, set):DrawData<Int>;
+	public var vertices(default, set):DrawData<Float> = new DrawData<Float>();
+	public var uvs(default, set):DrawData<Float> = new DrawData<Float>();
+	public var colors(default, set):DrawData<FlxColor> = new DrawData<FlxColor>();
+	public var indices(default, set):DrawData<Int> = new DrawData<Int>();
 	
 	private var verticesArray:Float32Array;
 	private var uvsArray:Float32Array;
@@ -58,9 +57,9 @@ class TrianglesData implements IFlxDestroyable
 	
 	private var gl:GLRenderContext;
 	
-	public function new(textured:Bool = true)
+	public function new()
 	{
-		this.textured = textured;
+		
 	}
 	
 	public function destroy():Void
@@ -93,7 +92,7 @@ class TrianglesData implements IFlxDestroyable
 			uvsBuffer = GL.createBuffer();
 			colorsBuffer = GL.createBuffer();
 			indicesBuffer = GL.createBuffer();
-			
+			/*
 			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
 			GL.bufferData(GL.ARRAY_BUFFER, verticesArray, GL.DYNAMIC_DRAW);
 			
@@ -105,6 +104,7 @@ class TrianglesData implements IFlxDestroyable
 			
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesArray, GL.STATIC_DRAW);
+			*/
 		}
 	}
 	
@@ -175,8 +175,6 @@ class TrianglesData implements IFlxDestroyable
 	
 	public function updateColors():Void
 	{
-		// TODO: check this and fix this...
-		
 		if (colors == null)
 			return;
 		
@@ -243,14 +241,13 @@ class TrianglesData implements IFlxDestroyable
  
 class Triangles extends FlxDrawHardwareItem<Triangles>
 {
+	private static var matrix4:Matrix4 = new Matrix4();
+	
+	private static var defaultShader:FlxTexturedTrianglesShader = new FlxTexturedTrianglesShader();
+	
 	public var blendMode:BlendMode;
 	
-	#if !flash
-	private var renderSession:RenderSession;
-	#end
-	
 	private var worldTransform:Matrix;
-	private var renderer:GLRenderer;
 	
 	public var data:TrianglesData;
 	
@@ -267,9 +264,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	
 	override public function destroy():Void
 	{
-		renderSession = null;
 		worldTransform = null;
-		renderer = null;
 		
 		shader = null;
 		blendMode = null;
@@ -284,16 +279,21 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	#end
 	{
 		this.worldTransform = worldTransform;
-		this.renderSession = renderSession;
-		this.renderer = cast renderSession.renderer;
-		
+		trace("renderGL");
 		// init! init!
 		setContext(renderSession.gl);
-		
+		trace("setContext");
 		// TODO: implement special strip shader with colors on and off...
 		// TODO: and with texture and without...
-		renderSession.shaderManager.setShader(shader);
 		
+		// TODO: add method for getting default shader based on this item values...
+		if (shader == null)
+		{
+			shader = defaultShader;
+		}
+		
+		renderSession.shaderManager.setShader(shader);
+		trace("setShader");
 		renderStrip(renderSession);
 	}
 	
@@ -303,10 +303,14 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	private function renderStrip(renderSession:RenderSession):Void
 	#end
 	{
+		trace("renderStrip");
+		
 		if (graphics != null)
 		{
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
+			
+			trace("texture set");
 		}
 		else
 		{
@@ -319,15 +323,46 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		// TODO: implement it...
 	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
 		
-		var matrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
+		var renderer:GLRenderer = cast renderSession.renderer;
+		var worldMatrix = renderer.getMatrix(worldTransform);
+		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(worldMatrix);
 		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
-		this.renderSession.blendModeManager.setBlendMode(blendMode);
+		trace("uMatrix set");
+		
+		if (matrix == null)
+		{
+			trace("matrix is null");
+		}
+		
+		if (matrix4 == null)
+		{
+			trace("matrix4 is null");
+		}
+		
+		matrix4.identity();
+		matrix4[0] = matrix.a;
+		matrix4[1] = matrix.b;
+		matrix4[4] = matrix.c;
+		matrix4[5] = matrix.d;
+		matrix4[12] = matrix.tx;
+		matrix4[13] = matrix.ty;
+		
+		trace("matrix4 calculated");
+		
+		GL.uniformMatrix4fv(shader.data.uModel.index, false, matrix4);
+		
+		trace("matrix4 set");
+		
+		renderSession.blendModeManager.setBlendMode(blendMode);
+		
+		trace("blendMode set");
 		
 		data.updateVertices();
 		GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
+		
+		trace("data.updateVertices");
 		
 		if (graphics != null)
 		{
@@ -353,6 +388,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	{
 		super.reset();
 		data = null;
+		matrix = null;
 	}
 	
 	private function setContext(gl:GLRenderContext):Void
@@ -360,6 +396,4 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		if (data != null)
 			data.setContext(gl);
 	}
-	
-	
 }

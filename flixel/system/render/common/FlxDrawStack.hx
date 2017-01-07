@@ -139,12 +139,12 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		return itemToReturn;
 	}
-	/*
+	
 	@:noCompletion
 	public function startTrianglesBatch(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader, numVertices:Int, numIndices:Int):FlxDrawTrianglesItem
+		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader, numVertices:Int, numIndices:Int):Triangles
 	{
-		
+		/*
 		if (!FlxCameraView.BATCH_TRIANGLES)
 		{
 			return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
@@ -155,28 +155,26 @@ class FlxDrawStack implements IFlxDestroyable
 		{	
 			return _headTriangles;
 		}
-		
+		*/
 		return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
-		
-		
 	}
 	
 	@:noCompletion
 	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesItem
+		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):Triangles
 	{
-		var itemToReturn:FlxDrawTrianglesItem = null;
+		var itemToReturn:Triangles = null;
 		
 		if (_storageTrianglesHead != null)
 		{
 			itemToReturn = _storageTrianglesHead;
-			var newHead:FlxDrawTrianglesItem = _storageTrianglesHead.nextTyped;
+			var newHead:Triangles = _storageTrianglesHead.nextTyped;
 			itemToReturn.reset();
 			_storageTrianglesHead = newHead;
 		}
 		else
 		{
-			itemToReturn = new FlxDrawTrianglesItem();
+			itemToReturn = new Triangles();
 		}
 		
 		itemToReturn.set(graphic, colored, false, blend, smooth, shader);
@@ -198,7 +196,6 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		return itemToReturn;
 	}
-	*/
 	
 	public function addTriangles(item:Triangles, ?matrix:FlxMatrix):Void
 	{
@@ -299,19 +296,20 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	// TODO: add support for repeat (it's true by default)
 	// TODO: support color offsets for this method also
-	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>,
-		uvtData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
+	public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		/*
-		var isColored:Bool = (transform != null && transform.hasRGBMultipliers());
+		// TODO: fix this...
+		var isColored:Bool = true;
+	//	var isColored:Bool = (transform != null && transform.hasRGBMultipliers());
 		
 		var drawItem = startTrianglesBatch(	graphic, smoothing, isColored, blend, shader, 
-											Std.int(vertices.length / 2), 
-											(indices != null) ? indices.length : Std.int(vertices.length / 2));
+											Std.int(data.vertices.length / 2), 
+											(data.indices != null) ? data.indices.length : Std.int(data.vertices.length / 2));
 		
-		drawItem.addTriangles(vertices, indices, uvtData, matrix, transform);
-		*/
+	//	drawItem.addTriangles(vertices, indices, uvtData, matrix, transform);
+		drawItem.data = data;
+		drawItem.matrix = matrix;
 	}
 	
 	public function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,
