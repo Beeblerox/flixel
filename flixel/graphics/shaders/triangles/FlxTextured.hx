@@ -1,12 +1,8 @@
-package flixel.graphics.shaders;
+package flixel.graphics.shaders.triangles;
 
 import flixel.system.FlxAssets.FlxShader;
 
-/**
- * ...
- * @author Yanrishatum
- */
-class FlxTexturedShader extends FlxShader
+class FlxTextured extends FlxShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -15,29 +11,29 @@ class FlxTexturedShader extends FlxShader
 			attribute vec4 aColor;
 			
 			varying vec2 vTexCoord;
-			varying vec4 vColor;
 			
 			uniform mat4 uMatrix;
+			uniform mat4 uModel;
 			
 			void main(void) 
 			{
 				vTexCoord = aTexCoord;
-				vColor = aColor;
-				gl_Position = uMatrix * aPosition;
+				gl_Position = uMatrix * uModel * aPosition;
 			}";
 			
 	public static inline var defaultFragmentSource:String = 
 			"
 			varying vec2 vTexCoord;
-			varying vec4 vColor;
 			
 			uniform sampler2D uImage0;
 			uniform vec4 uColor;
 			uniform vec4 uColorOffset;
+			uniform vec4 uTrianglesColor;
 			
 			void main(void) 
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
+				
 				vec4 result;
 				
 				if (color.a == 0.0) 
@@ -46,12 +42,16 @@ class FlxTexturedShader extends FlxShader
 				} 
 				else 
 				{
-					float alpha = color.a * vColor.a * uColor.a;
-					result = vec4(color.rgb * alpha, alpha) * vColor *  uColor;
+					float alpha = color.a * uColor.a;
+				//	float alpha = color.a * uColor.a * uTrianglesColor.a;
+					// OpenFl uses textures in bgra format, so we should convert color...
+					result = vec4(color.rgb * alpha, alpha) * uColor;
+				//	result = vec4(color.rgb * alpha, alpha) * uColor * uTrianglesColor;
 				}
 				
-				result = result + uColorOffset;
+			//	result = result + uColorOffset;
 				result = clamp(result, 0.0, 1.0);
+			//	gl_FragColor = color;
 				gl_FragColor = result;
 			}";
 	

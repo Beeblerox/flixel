@@ -2,8 +2,8 @@ package flixel.system.render.hardware.gl;
 
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shaders.FlxColorShader;
-import flixel.graphics.shaders.FlxTexturedShader;
+import flixel.graphics.shaders.tiles.FlxColored;
+import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
@@ -38,8 +38,8 @@ import openfl.geom.Rectangle;
 class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 {
 	#if FLX_RENDER_GL
-	private static var texturedTileShader:FlxTexturedShader;
-	private static var coloredTileShader:FlxColorShader;
+	private static var texturedTileShader:FlxTextured;
+	private static var coloredTileShader:FlxColored;
 	
 	private static var uColor:Array<Float> = [];
 
@@ -71,10 +71,10 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		__height = height;
 		
 		if (texturedTileShader == null) 
-			texturedTileShader = new FlxTexturedShader();
+			texturedTileShader = new FlxTextured();
 		
 		if (coloredTileShader == null) 
-			coloredTileShader = new FlxColorShader();
+			coloredTileShader = new FlxColored();
 		
 		states = [];
 		stateNum = 0;
@@ -92,7 +92,12 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		this.height = height;
 		
 		if (_renderHelper != null)
-			_renderHelper.resize(__width, __height);
+		{
+			// TODO: fix this...
+			
+			_renderHelper.resize(Math.ceil(__width * FlxG.camera.initialZoom), Math.ceil(__height * FlxG.camera.initialZoom));
+			//_renderHelper.resize(__width, __height);
+		}
 	}
 	
 	public function clear():Void
@@ -231,7 +236,10 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	private function get_renderHelper():GLRenderHelper
 	{
 		if (_renderHelper == null)
-			_renderHelper = new GLRenderHelper(this, __width, __height, true, false);
+		{
+			// TODO: fix this...
+			_renderHelper = new GLRenderHelper(this, Math.ceil(__width * FlxG.camera.initialZoom), Math.ceil(__height * FlxG.camera.initialZoom), true, false);
+		}
 		
 		return _renderHelper;
 	}

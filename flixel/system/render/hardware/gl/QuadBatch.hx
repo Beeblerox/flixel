@@ -2,8 +2,8 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.shaders.FlxColorShader;
-import flixel.graphics.shaders.FlxTexturedShader;
+import flixel.graphics.shaders.tiles.FlxColored;
+import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
@@ -52,8 +52,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	/**
 	 * Default tile shader.
 	 */
-	private static var defaultTexturedShader:FlxTexturedShader;
-	private static var defaultColoredShader:FlxColorShader;
+	private static var defaultTexturedShader:FlxTextured;
+	private static var defaultColoredShader:FlxColored;
 	
 	/**
 	 * Helper array for storing uniform matrix coefficients.
@@ -179,12 +179,12 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		if (defaultTexturedShader == null) 
 		{
-			defaultTexturedShader = new FlxTexturedShader();
+			defaultTexturedShader = new FlxTextured();
 		}
 		
 		if (defaultColoredShader == null)
 		{
-			defaultColoredShader = new FlxColorShader();
+			defaultColoredShader = new FlxColored();
 		}
 	}
 	

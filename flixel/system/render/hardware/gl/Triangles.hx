@@ -1,7 +1,7 @@
 package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shaders.FlxTexturedTrianglesShader;
+import flixel.graphics.shaders.triangles.FlxTexturedColored;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
@@ -243,7 +243,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 {
 	private static var matrix4:Matrix4 = new Matrix4();
 	
-	private static var defaultShader:FlxTexturedTrianglesShader = new FlxTexturedTrianglesShader();
+	private static var defaultShader:FlxTexturedColored = new FlxTexturedColored();
 	
 	public var blendMode:BlendMode;
 	
@@ -279,22 +279,28 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	#end
 	{
 		this.worldTransform = worldTransform;
-		trace("renderGL");
+		
 		// init! init!
 		setContext(renderSession.gl);
-		trace("setContext");
-		// TODO: implement special strip shader with colors on and off...
-		// TODO: and with texture and without...
 		
-		// TODO: add method for getting default shader based on this item values...
+		shader = getShader();
+		renderSession.shaderManager.setShader(shader);
+		
+		renderStrip(renderSession);
+	}
+	
+	private function getShader():FlxShader
+	{
 		if (shader == null)
 		{
+			// TODO: implement special strip shader with colors on and off...
+			// TODO: and with texture and without...
+			
+			// TODO: add method for getting default shader based on this item values...
 			shader = defaultShader;
 		}
 		
-		renderSession.shaderManager.setShader(shader);
-		trace("setShader");
-		renderStrip(renderSession);
+		return shader;
 	}
 	
 	#if flash
@@ -303,14 +309,10 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	private function renderStrip(renderSession:RenderSession):Void
 	#end
 	{
-		trace("renderStrip");
-		
 		if (graphics != null)
 		{
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
-			
-			trace("texture set");
 		}
 		else
 		{
@@ -329,18 +331,6 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
-		trace("uMatrix set");
-		
-		if (matrix == null)
-		{
-			trace("matrix is null");
-		}
-		
-		if (matrix4 == null)
-		{
-			trace("matrix4 is null");
-		}
-		
 		matrix4.identity();
 		matrix4[0] = matrix.a;
 		matrix4[1] = matrix.b;
@@ -349,20 +339,12 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		matrix4[12] = matrix.tx;
 		matrix4[13] = matrix.ty;
 		
-		trace("matrix4 calculated");
-		
 		GL.uniformMatrix4fv(shader.data.uModel.index, false, matrix4);
-		
-		trace("matrix4 set");
 		
 		renderSession.blendModeManager.setBlendMode(blendMode);
 		
-		trace("blendMode set");
-		
 		data.updateVertices();
 		GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
-		
-		trace("data.updateVertices");
 		
 		if (graphics != null)
 		{
