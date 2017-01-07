@@ -172,7 +172,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		// TODO: sprites might have renderTarget property
 		
 	//	FlxG.game.draw();
-		
+	
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
 		

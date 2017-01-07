@@ -573,6 +573,17 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		{
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
+			
+			if (smoothing) 
+			{		
+				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
+			}
+			else
+			{		
+				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
+			}
 		}
 		else
 		{

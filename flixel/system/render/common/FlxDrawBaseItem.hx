@@ -91,7 +91,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	public var next:FlxDrawBaseItem<T>;
 	
 	public var graphics:FlxGraphic;
-	public var antialiasing:Bool = false;
+	public var smoothing:Bool = false;
 	public var colored:Bool = false;
 	public var hasColorOffsets:Bool = false;
 	public var blending:BlendMode = null;
@@ -119,7 +119,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	public function reset():Void
 	{
 		graphics = null;
-		antialiasing = false;
+		smoothing = false;
 		hasColorOffsets = false;
 		colored = false;
 		blending = null;
@@ -167,7 +167,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 			&& this.colored == colored
 			&& this.hasColorOffsets == hasColorOffsets
 			&& this.blending == blend
-			&& this.antialiasing == smooth
+			&& this.smoothing == smooth
 			&& this.shader == shader);
 	}
 	
@@ -178,7 +178,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		this.colored = colored;
 		this.hasColorOffsets = hasColorOffsets;
 		this.blending = blend;
-		this.antialiasing = smooth;
+		this.smoothing = smooth;
 		this.shader = shader;
 	}
 	
