@@ -10,49 +10,33 @@ class FlxTextured extends FlxShader
 			attribute vec2 aTexCoord;
 			attribute vec4 aColor;
 			
-			varying vec2 vTexCoord;
-			
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
 			
 			void main(void) 
 			{
 				vTexCoord = aTexCoord;
+				// OpenFl uses textures in bgra format, so we should convert color...
+				vColor = aColor.bgra;
 				gl_Position = uMatrix * uModel * aPosition;
 			}";
 			
 	public static inline var defaultFragmentSource:String = 
 			"
 			varying vec2 vTexCoord;
+			varying vec4 vColor;
 			
 			uniform sampler2D uImage0;
 			uniform vec4 uColor;
 			uniform vec4 uColorOffset;
-			uniform vec4 uTrianglesColor;
 			
 			void main(void) 
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
-				
-				vec4 result;
-				
-				if (color.a == 0.0) 
-				{
-					result = vec4(0.0, 0.0, 0.0, 0.0);
-				} 
-				else 
-				{
-					float alpha = color.a * uColor.a;
-				//	float alpha = color.a * uColor.a * uTrianglesColor.a;
-					// OpenFl uses textures in bgra format, so we should convert color...
-					result = vec4(color.rgb * alpha, alpha) * uColor;
-				//	result = vec4(color.rgb * alpha, alpha) * uColor * uTrianglesColor;
-				}
-				
-			//	result = result + uColorOffset;
-				result = clamp(result, 0.0, 1.0);
-			//	gl_FragColor = color;
-				gl_FragColor = result;
+				float alpha = color.a * vColor.a * uColor.a;
+				// OpenFl uses textures in bgra format, so we should convert color...
+				vec4 result = vec4(color.rgb * alpha, alpha) * vColor * uColor.bgra + uColorOffset.bgra;
+				gl_FragColor = clamp(result, 0.0, 1.0);
 			}";
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
@@ -61,7 +45,6 @@ class FlxTextured extends FlxShader
 		
 		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
 		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		
 		__glSourceDirty = true;
 	}
 

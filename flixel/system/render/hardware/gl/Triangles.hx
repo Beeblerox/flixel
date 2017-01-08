@@ -11,6 +11,7 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
+import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 
 #if FLX_RENDER_GL
@@ -294,6 +295,8 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	 */
 	public var matrix:Matrix;
 	
+	public var color:ColorTransform;
+	
 	public function new() 
 	{
 		super();
@@ -308,6 +311,8 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		blendMode = null;
 		
 		data = null;
+		matrix = null;
+		color = null;
 	}
 	
 	#if flash

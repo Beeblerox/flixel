@@ -11,9 +11,6 @@ class FlxTexturedColored extends FlxShader
 			attribute vec4 aPosition;
 			attribute vec4 aColor;
 			
-			varying vec2 vTexCoord;
-			varying vec4 vColor;
-			
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
 			
@@ -29,23 +26,11 @@ class FlxTexturedColored extends FlxShader
 			
 			uniform vec4 uColor;
 			uniform vec4 uColorOffset;
-			uniform vec4 uTrianglesColor;
 			
 			void main(void) 
 			{
-				vec4 color = vColor;
-				
-				vec4 result;
-				
-				float alpha = color.a * vColor.a * uColor.a;
-				//	float alpha = color.a * vColor.a * uColor.a * uTrianglesColor.a;
-				result = vec4(color.rgb * alpha, alpha) * vColor *  uColor;
-				//	result = vec4(color.rgb * alpha, alpha) * vColor *  uColor * uTrianglesColor;
-				
-			//	result = result + uColorOffset;
-				result = clamp(result, 0.0, 1.0);
-			//	gl_FragColor = color;
-				gl_FragColor = result;
+				vec4 result = vColor *  uColor + uColorOffset;
+				gl_FragColor = clamp(result, 0.0, 1.0);
 			}";
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
