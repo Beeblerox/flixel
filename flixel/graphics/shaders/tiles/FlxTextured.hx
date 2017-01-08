@@ -15,16 +15,16 @@ class FlxTextured extends FlxShader
 			attribute vec4 aPosition;
 			attribute vec2 aTexCoord;
 			attribute vec4 aColor;
-			
-			varying vec2 vTexCoord;
-			varying vec4 vColor;
+			attribute vec4 aColorOffset;
 			
 			uniform mat4 uMatrix;
 			
 			void main(void) 
 			{
 				vTexCoord = aTexCoord;
-				vColor = aColor;
+				// OpenFl uses textures in bgra format, so we should convert colors...
+				vColor = aColor.bgra;
+				vColorOffset = aColorOffset.bgra;
 				gl_Position = uMatrix * aPosition;
 			}";
 			
@@ -32,32 +32,19 @@ class FlxTextured extends FlxShader
 			"
 			varying vec2 vTexCoord;
 			varying vec4 vColor;
+			varying vec4 vColorOffset;
 			
 			uniform sampler2D uImage0;
-			
-			// TODO: move it to default camera filter shader...
-			uniform vec4 uColor;
-			
-			// TODO: convert in to varying...
-			uniform vec4 uColorOffset;
 			
 			void main(void) 
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
-				vec4 result;
 				
-				if (color.a == 0.0) 
-				{
-					result = vec4(0.0, 0.0, 0.0, 0.0);
-				} 
-				else 
-				{
-					float alpha = color.a * vColor.a * uColor.a;
-					result = vec4(color.rgb * alpha, alpha) * vColor *  uColor;
-				}
-				
-				result = result + uColorOffset;
+				float alpha = color.a * vColor.a;
+				vec4 result = vec4(color.rgb * alpha, alpha) * vColor;
+				result = result + vColorOffset;
 				result = clamp(result, 0.0, 1.0);
+				
 				gl_FragColor = result;
 			}";
 	

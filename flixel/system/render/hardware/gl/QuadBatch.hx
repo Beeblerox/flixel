@@ -34,6 +34,9 @@ import openfl.utils.Float32Array;
  * ...
  * @author Zaphod
  */
+
+// TODO: remove colored quads, colored tiles should be drawn only with triangles...
+
 class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 {
 	public static var BATCH_SIZE:Int = 2000;
@@ -83,8 +86,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	}
 	
 	public var roundPixels:Bool = false;
-	
-	public var textured:Bool;
 	
 	/**
 	 * The number of images in the SpriteBatch before it flushes.
@@ -550,6 +551,12 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			
 			// color attributes will be interpreted as unsigned bytes and normalized
 			GL.vertexAttribPointer(shader.data.aColor.index, 4, gl.UNSIGNED_BYTE, true, stride, offset);
+			
+			// TODO: textured quads also will have color offset attribute, so we'll need to activate it also...
+			if (textured)
+			{
+				
+			}
 		}
 		
 		// upload the verts to the buffer  

@@ -29,9 +29,10 @@ class FlxTexturedColored extends FlxShader
 			varying vec4 vColor;
 			
 			uniform sampler2D uImage0;
+			
+			// 
 			uniform vec4 uColor;
 			uniform vec4 uColorOffset;
-			uniform vec4 uTrianglesColor;
 			
 			void main(void) 
 			{
@@ -46,10 +47,8 @@ class FlxTexturedColored extends FlxShader
 				else 
 				{
 					float alpha = color.a * vColor.a * uColor.a;
-				//	float alpha = color.a * vColor.a * uColor.a * uTrianglesColor.a;
 					// OpenFl uses textures in bgra format, so we should convert color...
 					result = vec4(color.rgb * alpha, alpha) * vColor *  uColor;
-				//	result = vec4(color.rgb * alpha, alpha) * vColor *  uColor * uTrianglesColor;
 				}
 				
 			//	result = result + uColorOffset;

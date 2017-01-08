@@ -5,6 +5,7 @@ import flixel.graphics.shaders.triangles.FlxTexturedColored;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
+import flixel.system.render.hardware.gl.Triangles.TrianglesData;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -31,6 +32,20 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class TrianglesData implements IFlxDestroyable
 {
+	public static function getColorNetData(numColumns:Int = 1, numRows:Int):TrianglesData
+	{
+		// TODO: implement it...
+		
+		return null;
+	}
+	
+	public static function getTexturedNetData(numColumns:Int = 1, numRows:Int):TrianglesData
+	{
+		// TODO: implement it...
+		
+		return null;
+	}
+	
 	public var numIndices(get, null):Int;
 	
 	public var dirty(default, set):Bool = true;
