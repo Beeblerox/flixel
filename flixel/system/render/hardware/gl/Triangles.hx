@@ -32,18 +32,41 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class TrianglesData implements IFlxDestroyable
 {
-	public static function getColorNetData(numColumns:Int = 1, numRows:Int):TrianglesData
+	public static function getQuadData(width:Float = 100, height:Float = 100, color:FlxColor = FlxColor.WHITE):TrianglesData
 	{
-		// TODO: implement it...
+		var data:TrianglesData = new TrianglesData();
 		
-		return null;
-	}
-	
-	public static function getTexturedNetData(numColumns:Int = 1, numRows:Int):TrianglesData
-	{
-		// TODO: implement it...
+		data.vertices[0] = 0.0;
+		data.vertices[1] = 0.0;
+		data.vertices[2] = width;
+		data.vertices[3] = 0.0;
+		data.vertices[4] = width;
+		data.vertices[5] = height;
+		data.vertices[6] = 0;
+		data.vertices[7] = height;
 		
-		return null;
+		data.uvs[0] = 0.0;
+		data.uvs[1] = 0.0;
+		data.uvs[2] = 1.0;
+		data.uvs[3] = 0.0;
+		data.uvs[4] = 1.0;
+		data.uvs[5] = 1.0;
+		data.uvs[6] = 0;
+		data.uvs[7] = 1.0;
+		
+		data.colors[0] = color;
+		data.colors[1] = color;
+		data.colors[2] = color;
+		data.colors[3] = color;
+		
+		data.indices[0] = 0;
+		data.indices[1] = 1;
+		data.indices[2] = 2;
+		data.indices[3] = 2;
+		data.indices[4] = 3;
+		data.indices[5] = 0;
+		
+		return data;
 	}
 	
 	public var numIndices(get, null):Int;
