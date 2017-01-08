@@ -34,7 +34,11 @@ class FlxTextured extends FlxShader
 			varying vec4 vColor;
 			
 			uniform sampler2D uImage0;
+			
+			// TODO: move it to default camera filter shader...
 			uniform vec4 uColor;
+			
+			// TODO: convert in to varying...
 			uniform vec4 uColorOffset;
 			
 			void main(void) 
