@@ -1,7 +1,8 @@
 package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shaders.triangles.FlxTexturedColored;
+import flixel.graphics.shaders.triangles.FlxColored;
+import flixel.graphics.shaders.triangles.FlxTextured;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
@@ -282,7 +283,11 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 {
 	private static var matrix4:Matrix4 = new Matrix4();
 	
-	private static var defaultShader:FlxTexturedColored = new FlxTexturedColored();
+	/**
+	 * Default tile shader.
+	 */
+	private static var defaultTexturedShader:FlxTextured = new FlxTextured();
+	private static var defaultColoredShader:FlxColored = new FlxColored();
 	
 	public var blendMode:BlendMode;
 	
@@ -334,14 +339,11 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	
 	private function getShader():FlxShader
 	{
+		// TODO: use FlxTexturedColored shader as well...
+		// TODO: add FlxTexturedColored static variable...
+		
 		if (shader == null)
-		{
-			// TODO: implement special strip shader with colors on and off...
-			// TODO: and with texture and without...
-			
-			// TODO: add method for getting default shader based on this item values...
-			shader = defaultShader;
-		}
+			shader = (graphics != null) ? defaultTexturedShader : defaultColoredShader;
 		
 		return shader;
 	}
@@ -357,16 +359,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
 			
-			if (smoothing) 
-			{		
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
-			}
-			else
-			{		
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
-			}
+			setTextureSmoothing(smoothing);
 		}
 		else
 		{
@@ -400,7 +393,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		data.updateVertices();
 		GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, 0, 0);
 		
-		if (graphics != null)
+		if (textured)
 		{
 			// update the uvs
 			data.updateUV();

@@ -30,6 +30,21 @@ class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 		view.drawItem(this);
 		#end
 	}
+	
+	private function setTextureSmoothing(smooth:Bool):Void
+	{
+		if (smooth) 
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
+		}
+		else
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
+		}
+	}
+	
 	/*
 	// Set values
 	private inline function addTexturedVertexData(x:Float, y:Float, u:Float, v:Float, r:Float = 1.0, g:Float = 1.0, b:Float = 1.0, a:Float = 1.0):Void

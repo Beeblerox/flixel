@@ -114,6 +114,9 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public var elementsPerTile(get, null):Int;
 	
+	// TODO: use this var...
+	public var textured(get, null):Bool;
+	
 	public function new() {}
 	
 	public function reset():Void
@@ -208,5 +211,10 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	private function get_elementsPerTile():Int
 	{
 		return 0;
+	}
+	
+	private inline function get_textured():Bool
+	{
+		return (graphics != null);
 	}
 }

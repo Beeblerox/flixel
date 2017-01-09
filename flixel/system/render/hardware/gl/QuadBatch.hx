@@ -39,6 +39,8 @@ import openfl.utils.Float32Array;
 
 class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 {
+	public static inline var ELEMENTS_PER_VERTEX:Int = 6;
+	
 	public static var BATCH_SIZE:Int = 2000;
 	
 	/**
@@ -55,8 +57,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	/**
 	 * Default tile shader.
 	 */
-	private static var defaultTexturedShader:FlxTextured;
-	private static var defaultColoredShader:FlxColored;
+	private static var defaultShader:FlxTextured = new FlxTextured();
 	
 	/**
 	 * Helper array for storing uniform matrix coefficients.
@@ -139,16 +140,15 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	
 	private var renderer:GLRenderer;
 	
-	public function new(size:Int = 2000, textured:Bool) 
+	public function new(size:Int = 2000) 
 	{
 		super();
 		type = FlxDrawItemType.TILES;
 		
 		this.size = size;
-		this.textured = textured;
 		
 		// The total number of bytes in our batch
-		var numBytes:Int = size * Float32Array.BYTES_PER_ELEMENT * VERTICES_PER_QUAD * elementsPerVertex;
+		var numBytes:Int = size * Float32Array.BYTES_PER_ELEMENT * VERTICES_PER_QUAD * QuadBatch.ELEMENTS_PER_VERTEX;
 		// The total number of indices in our batch
 		var numIndices:Int = size * INDICES_PER_QUAD;
 		
@@ -176,16 +176,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		for (i in 0...size)
 		{
 			states[i] = new RenderState();
-		}
-		
-		if (defaultTexturedShader == null) 
-		{
-			defaultTexturedShader = new FlxTextured();
-		}
-		
-		if (defaultColoredShader == null)
-		{
-			defaultColoredShader = new FlxColored();
 		}
 	}
 	
@@ -230,17 +220,15 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	{
 		flush();
 	}
-	
+	/*
 	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
 	{
-		/*
 		// check texture..
-		if (currentBatchSize > size)
-		{
-			flush();
-			currentTexture = texture;
-		}
-		*/
+	//	if (currentBatchSize > size)
+	//	{
+	//		flush();
+	//		currentTexture = texture;
+	//	}
 		
 		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex;
 		
@@ -304,7 +292,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		currentBatchSize++;
 	}
-	
+	*/
 	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
 		addUVQuad(frame.parent, frame.frame, frame.uv, matrix, transform, blend, smoothing);
@@ -327,7 +315,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		var uvx2:Float = uv.width;
 		var uvy2:Float = uv.height;
 		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex;
+		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * QuadBatch.ELEMENTS_PER_VERTEX;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -341,6 +329,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		var intX:Int, intY:Int;
 		
+		// TODO: fix data indices...
+		
 		if (roundPixels)
 		{
 			intX = Std.int(tx);
@@ -351,16 +341,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			positions[i + 1] = intY; 						// 0 * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 5] = w * a + intX;				// w * a + 0 * c + tx | 0;
-			positions[i + 6] = w * b + intY;				// w * b + 0 * d + ty | 0;
+			positions[i + 6] = w * a + intX;				// w * a + 0 * c + tx | 0;
+			positions[i + 7] = w * b + intY;				// w * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 10] = h * c + intX;				// 0 * a + h * c + tx | 0;
-			positions[i + 11] = h * d + intY;				// 0 * b + h * d + ty | 0;
+			positions[i + 12] = h * c + intX;				// 0 * a + h * c + tx | 0;
+			positions[i + 13] = h * d + intY;				// 0 * b + h * d + ty | 0;
 			
 			// xy
-			positions[i + 15] = w * a + h * c + intX;
-			positions[i + 16] = w * b + h * d + intY;
+			positions[i + 18] = w * a + h * c + intX;
+			positions[i + 19] = w * b + h * d + intY;
 		}
 		else
 		{
@@ -369,16 +359,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			positions[i + 1] = ty;
 			
 			// xy
-			positions[i + 5] = w * a + tx;
-			positions[i + 6] = w * b + ty;
+			positions[i + 6] = w * a + tx;
+			positions[i + 7] = w * b + ty;
 			
 			// xy
-			positions[i + 10] = h * c + tx;
-			positions[i + 11] = h * d + ty;
+			positions[i + 12] = h * c + tx;
+			positions[i + 13] = h * d + ty;
 			
 			// xy
-			positions[i + 15] = w * a + h * c + tx;
-			positions[i + 16] = w * b + h * d + ty;
+			positions[i + 18] = w * a + h * c + tx;
+			positions[i + 19] = w * b + h * d + ty;
 		}
 		
 		// uv
@@ -386,16 +376,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		positions[i + 3] = uvy;
 		
 		// uv
-		positions[i + 7] = uvx2;
-		positions[i + 8] = uvy;
+		positions[i + 8] = uvx2;
+		positions[i + 9] = uvy;
 		
 		// uv
-		positions[i + 12] = uvx;
-		positions[i + 13] = uvy2;
+		positions[i + 14] = uvx;
+		positions[i + 15] = uvy2;
 		
 		// uv
-		positions[i + 17] = uvx2;
-		positions[i + 18] = uvy2;
+		positions[i + 20] = uvx2;
+		positions[i + 21] = uvy2;
 		
 		var tint = 0xFFFFFF, color = 0xFFFFFFFF;
 		
@@ -405,7 +395,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			color = (Std.int(transform.alphaMultiplier * 255) & 0xFF) << 24 | tint;
 		}
 		
-		colors[i + 4] = colors[i + 9] = colors[i + 14] = colors[i + 19] = color;
+		colors[i + 4] = colors[i + 10] = colors[i + 16] = colors[i + 22] = color;
+		
+		// update color offsets
+		if (transform != null)
+		{
+			tint = Std.int(transform.redOffset) << 16 | Std.int(transform.greenOffset) << 8 | Std.int(transform.blueOffset);
+			color = (Std.int(transform.alphaOffset) & 0xFF) << 24 | tint;
+		}
+		
+		colors[i + 5] = colors[i + 11] = colors[i + 17] = colors[i + 23] = color;
 		
 		var state:RenderState = states[currentBatchSize];
 		state.set(texture, transform, blend, smoothing);
@@ -512,19 +511,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	
 	private inline function getShader():FlxShader
 	{
-		if (shader == null)
-		{
-			if (textured)
-			{
-				shader = defaultTexturedShader;
-			}
-			else
-			{
-				shader = defaultColoredShader;
-			}
-		}
-		
-		return shader;
+		return (shader == null) ? defaultShader : shader;
 	}
 	
 	private function onShaderSwitch():Void
@@ -537,26 +524,23 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indexBuffer);
 			
 			// this is the same for each shader?
-			var stride:Int = elementsPerVertex * Float32Array.BYTES_PER_ELEMENT;
+			var stride:Int = QuadBatch.ELEMENTS_PER_VERTEX * Float32Array.BYTES_PER_ELEMENT;
 			var offset:Int = 0;
 			
 			GL.vertexAttribPointer(shader.data.aPosition.index, 2, GL.FLOAT, false, stride, offset);
 			offset += 2 * 4;
 			
-			if (textured)
-			{
-				GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, offset);
-				offset += 2 * 4;
-			}
+			GL.vertexAttribPointer(shader.data.aTexCoord.index, 2, GL.FLOAT, false, stride, offset);
+			offset += 2 * 4;
 			
 			// color attributes will be interpreted as unsigned bytes and normalized
-			GL.vertexAttribPointer(shader.data.aColor.index, 4, gl.UNSIGNED_BYTE, true, stride, offset);
+			GL.vertexAttribPointer(shader.data.aColor.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
+			offset += 4;
 			
-			// TODO: textured quads also will have color offset attribute, so we'll need to activate it also...
-			if (textured)
-			{
-				
-			}
+			// TODO: quads also will have color offset attribute, so we'll need to activate it also...
+			
+			// color offsets will be interpreted as unsigned bytes and normalized
+			GL.vertexAttribPointer(shader.data.aColorOffset.index, 4, GL.UNSIGNED_BYTE, true, stride, offset);
 		}
 		
 		// upload the verts to the buffer  
@@ -566,7 +550,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		}
 		else
 		{
-			var view = positions.subarray(0, currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex);
+			var view = positions.subarray(0, currentBatchSize * Float32Array.BYTES_PER_ELEMENT * QuadBatch.ELEMENTS_PER_VERTEX);
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, view);
 		}
 	}
@@ -581,16 +565,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 			
-			if (smoothing) 
-			{		
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
-			}
-			else
-			{		
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-				GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
-			}
+			setTextureSmoothing(smoothing);
 		}
 		else
 		{
@@ -598,8 +573,10 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			GL.bindTexture(GL.TEXTURE_2D, null);
 		}
 		
-		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
-		GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
+		// TODO: move this uniform setting code into default camera color transform filter...
+	//	GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
+	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
+		// end of todo...
 		
 		var matrix = renderer.getMatrix(worldTransform);
 		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
@@ -630,7 +607,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		vertices = null;
 		indices = null;
-		
 		positions = null;
 		colors = null;
 		
@@ -671,11 +647,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		super.set(graphic, colored, hasColorOffsets, blend, smooth, shader);
 		
 		textured = (graphic != null);
-	}
-	
-	override function get_elementsPerVertex():Int 
-	{
-		return (textured) ? FlxDrawHardwareItem.ELEMENTS_PER_TEXTURED_VERTEX : FlxDrawHardwareItem.ELEMENTS_PER_NON_TEXTURED_VERTEX;
 	}
 }
 
