@@ -2,7 +2,6 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.shaders.tiles.FlxColored;
 import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
@@ -63,12 +62,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	 * Helper array for storing uniform matrix coefficients.
 	 */
 	private static var uMatrix:Float32Array = new Float32Array(16);
-	
-	/**
-	 * Helper array for storing color offsets.
-	 */
-	private static var uColorOffset:Array<Float> = [];
-	
 	
 	/**
 	 * Current texture being used by batch.
@@ -397,6 +390,9 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		colors[i + 4] = colors[i + 10] = colors[i + 16] = colors[i + 22] = color;
 		
+		tint = 0x000000;
+		color = 0x00000000;
+		
 		// update color offsets
 		if (transform != null)
 		{
@@ -407,7 +403,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		colors[i + 5] = colors[i + 11] = colors[i + 17] = colors[i + 23] = color;
 		
 		var state:RenderState = states[currentBatchSize];
-		state.set(texture, transform, blend, smoothing);
+		state.set(texture, blend, smoothing);
 		
 		currentBatchSize++;
 	}
@@ -435,25 +431,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		currentBlendMode = nextBlendMode = state.blend;
 		renderSession.blendModeManager.setBlendMode(currentBlendMode);
 		
-		var currentRedOffset:Float = 0.0;
-		var currentGreenOffset:Float = 0.0;
-		var currentBlueOffset:Float = 0.0;
-		var currentAlphaOffset:Float = 0.0;
-		
-		var nextRedOffset:Float = 0.0;
-		var nextGreenOffset:Float = 0.0;
-		var nextBlueOffset:Float = 0.0;
-		var nextAlphaOffset:Float = 0.0;
-		
-		currentRedOffset = nextRedOffset = 0.0;
-		currentGreenOffset = nextGreenOffset = 0.0;
-		currentBlueOffset = nextBlueOffset = 0.0;
-		currentAlphaOffset = nextAlphaOffset = 0.0;
-		
-		uColorOffset[0] = uColorOffset[1] = uColorOffset[2] = uColorOffset[3] = 0.0;
-		
 		var blendSwap:Bool = false;
-		var colorOffsetSwap:Bool = false;
 		var textureSwap:Bool = false;
 		
 		for (i in 0...currentBatchSize)
@@ -463,16 +441,10 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			nextTexture = state.texture;
 			nextBlendMode = state.blend;
 			
-			nextRedOffset = state.redOffset;
-			nextGreenOffset = state.greenOffset;
-			nextBlueOffset = state.blueOffset;
-			nextAlphaOffset = state.alphaOffset;
-			
 			blendSwap = (currentBlendMode != nextBlendMode);
-			colorOffsetSwap = (currentRedOffset != nextRedOffset || currentGreenOffset != nextGreenOffset || currentBlueOffset != nextBlueOffset || currentAlphaOffset != nextAlphaOffset);
 			textureSwap = (currentTexture != nextTexture);
 			
-			if (textureSwap || blendSwap || colorOffsetSwap)
+			if (textureSwap || blendSwap)
 			{
 				renderBatch(currentTexture, batchSize, startIndex);
 				
@@ -484,19 +456,6 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 				{
 					currentBlendMode = nextBlendMode;
 					this.renderSession.blendModeManager.setBlendMode(currentBlendMode);
-				}
-				
-				if (colorOffsetSwap)
-				{
-					currentRedOffset = nextRedOffset;
-					currentGreenOffset = nextGreenOffset;
-					currentBlueOffset = nextBlueOffset;
-					currentAlphaOffset = nextAlphaOffset;
-					
-					uColorOffset[0] = currentRedOffset;
-					uColorOffset[1] = currentGreenOffset;
-					uColorOffset[2] = currentBlueOffset;
-					uColorOffset[3] = currentAlphaOffset;
 				}
 			}
 			
@@ -656,36 +615,16 @@ class RenderState implements IFlxDestroyable
 	public var smoothing:Bool;
 	public var texture:FlxGraphic;
 	
-	public var redOffset:Float;
-	public var greenOffset:Float;
-	public var blueOffset:Float;
-	public var alphaOffset:Float;
-	
 	public var startIndex:Int = 0;
 	public var size:Int = 0;
 	
 	public function new() {}
 	
-	public inline function set(texture:FlxGraphic, color:ColorTransform, blend:BlendMode, smooth:Bool = false):Void
+	public inline function set(texture:FlxGraphic, blend:BlendMode, smooth:Bool = false):Void
 	{
 		this.texture = texture;
 		this.smoothing = smooth;
 		this.blend = blend;
-		
-		if (color != null)
-		{
-			this.redOffset = color.redOffset / 255;
-			this.greenOffset = color.greenOffset / 255;
-			this.blueOffset = color.blueOffset / 255;
-			this.alphaOffset = color.alphaOffset / 255;
-		}
-		else
-		{
-			this.redOffset = 0;
-			this.greenOffset = 0;
-			this.blueOffset = 0;
-			this.alphaOffset = 0;
-		}
 	}
 	
 	public function destroy():Void

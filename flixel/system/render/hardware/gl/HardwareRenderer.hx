@@ -2,7 +2,6 @@ package flixel.system.render.hardware.gl;
 
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shaders.tiles.FlxColored;
 import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;
@@ -38,9 +37,6 @@ import openfl.geom.Rectangle;
 class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 {
 	#if FLX_RENDER_GL
-	private static var texturedTileShader:FlxTextured;
-	private static var coloredTileShader:FlxColored;
-	
 	private static var uColor:Array<Float> = [];
 
 	private var states:Array<FlxDrawHardwareItem<Dynamic>>;
@@ -69,12 +65,6 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		__width = width;
 		__height = height;
-		
-		if (texturedTileShader == null) 
-			texturedTileShader = new FlxTextured();
-		
-		if (coloredTileShader == null) 
-			coloredTileShader = new FlxColored();
 		
 		states = [];
 		stateNum = 0;

@@ -117,7 +117,7 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 		else
 		{
-			itemToReturn = new QuadBatch(2000, (graphic != null));
+			itemToReturn = new QuadBatch(2000);
 		}
 		
 		itemToReturn.set(graphic, colored, hasColorOffsets, blend, smooth, shader);

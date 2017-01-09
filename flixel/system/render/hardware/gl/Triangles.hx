@@ -2,7 +2,9 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.shaders.triangles.FlxColored;
+import flixel.graphics.shaders.triangles.FlxSingleColored;
 import flixel.graphics.shaders.triangles.FlxTextured;
+import flixel.graphics.shaders.triangles.FlxTexturedColored;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
@@ -132,19 +134,6 @@ class TrianglesData implements IFlxDestroyable
 			uvsBuffer = GL.createBuffer();
 			colorsBuffer = GL.createBuffer();
 			indicesBuffer = GL.createBuffer();
-			/*
-			GL.bindBuffer(GL.ARRAY_BUFFER, verticesBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, verticesArray, GL.DYNAMIC_DRAW);
-			
-			GL.bindBuffer(GL.ARRAY_BUFFER, uvsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, uvsArray, GL.STATIC_DRAW);
-			
-			GL.bindBuffer(GL.ARRAY_BUFFER, colorsBuffer);
-			GL.bufferData(GL.ARRAY_BUFFER, colorsArray, GL.STATIC_DRAW);
-			
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesArray, GL.STATIC_DRAW);
-			*/
 		}
 	}
 	
@@ -286,8 +275,10 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	/**
 	 * Default tile shader.
 	 */
+	private static var defaultTextureColoredShader:FlxTexturedColored = new FlxTexturedColored();
 	private static var defaultTexturedShader:FlxTextured = new FlxTextured();
 	private static var defaultColoredShader:FlxColored = new FlxColored();
+	private static var defaultSingleColoredShader:FlxSingleColored = new FlxSingleColored();
 	
 	public var blendMode:BlendMode;
 	
@@ -300,6 +291,9 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	 */
 	public var matrix:Matrix;
 	
+	/**
+	 * Color transform for this item.
+	 */
 	public var color:ColorTransform;
 	
 	public function new() 
@@ -339,11 +333,13 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	
 	private function getShader():FlxShader
 	{
-		// TODO: use FlxTexturedColored shader as well...
-		// TODO: add FlxTexturedColored static variable...
+		if (shader != null)
+			return shader;
 		
-		if (shader == null)
-			shader = (graphics != null) ? defaultTexturedShader : defaultColoredShader;
+		if (textured)
+			shader = (colored) ? defaultTextureColoredShader : defaultTexturedShader;
+		else
+			shader = (colored) ? defaultColoredShader : defaultSingleColoredShader;
 		
 		return shader;
 	}
@@ -354,7 +350,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	private function renderStrip(renderSession:RenderSession):Void
 	#end
 	{
-		if (graphics != null)
+		if (textured)
 		{
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
@@ -367,10 +363,32 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 			GL.bindTexture(GL.TEXTURE_2D, null);
 		}
 		
+		var red:Float = 1.0;
+		var green:Float = 1.0;
+		var blue:Float = 1.0;
+		var alpha:Float = 1.0;
+		
+		var redOffset:Float = 0.0;
+		var greenOffset:Float = 0.0;
+		var blueOffset:Float = 0.0;
+		var alphaOffset:Float = 0.0;
+		
+		if (color != null)
+		{
+			red = color.redMultiplier;
+			green = color.greenMultiplier;
+			blue = color.blueMultiplier;
+			alpha = color.alphaMultiplier;
+			
+			redOffset = color.redOffset / 255;
+			greenOffset = color.greenOffset / 255;
+			blueOffset = color.blueOffset / 255;
+			alphaOffset = color.alphaOffset / 255;
+		}
+		
 		// set uniforms
-		GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
-		// TODO: implement it...
-	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
+		GL.uniform4f(shader.data.uColor.index, red, green, blue, alpha);
+		GL.uniform4f(shader.data.uColorOffset.index, redOffset, greenOffset, blueOffset, alphaOffset);
 		
 		var renderer:GLRenderer = cast renderSession.renderer;
 		var worldMatrix = renderer.getMatrix(worldTransform);
@@ -378,6 +396,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
+		// set transform matrix for all triangles in this item:
 		matrix4.identity();
 		matrix4[0] = matrix.a;
 		matrix4[1] = matrix.b;
@@ -385,7 +404,6 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		matrix4[5] = matrix.d;
 		matrix4[12] = matrix.tx;
 		matrix4[13] = matrix.ty;
-		
 		GL.uniformMatrix4fv(shader.data.uModel.index, false, matrix4);
 		
 		renderSession.blendModeManager.setBlendMode(blendMode);
