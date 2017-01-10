@@ -75,6 +75,8 @@ class TrianglesData implements IFlxDestroyable
 	
 	public var numIndices(get, null):Int;
 	
+	public var colored(get, null):Bool;
+	
 	public var dirty(default, set):Bool = true;
 	
 	public var verticesDirty:Bool = true;
@@ -266,8 +268,13 @@ class TrianglesData implements IFlxDestroyable
 	{
 		return (indicesArray != null) ? indicesArray.length : 0;
 	}
+	
+	private function get_colored():Bool
+	{
+		return (colors != null) && (colors.length > 0);
+	}
 }
- 
+
 class Triangles extends FlxDrawHardwareItem<Triangles>
 {
 	private static var matrix4:Matrix4 = new Matrix4();
@@ -335,7 +342,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 	{
 		if (shader != null)
 			return shader;
-		
+			
 		if (textured)
 			shader = (colored) ? defaultTextureColoredShader : defaultTexturedShader;
 		else
@@ -436,6 +443,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		super.reset();
 		data = null;
 		matrix = null;
+		color = null;
 	}
 	
 	private function setContext(gl:GLRenderContext):Void

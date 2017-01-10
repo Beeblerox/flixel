@@ -103,8 +103,6 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 	}
 	
-	// TODO: continue from here...
-	
 	@:noCompletion
 	public function getTexturedTilesCommand(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
@@ -232,16 +230,6 @@ class FlxDrawStack implements IFlxDestroyable
 		return itemToReturn;
 	}
 	
-	// TODO: fix this...
-	public function addTriangles(item:Triangles, ?matrix:FlxMatrix):Void
-	{
-		/*
-		_currentDrawItem = item;
-		_drawItems[_numItems] = item;
-		_numItems++;
-		*/
-	}
-	
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
 	{
 		#if FLX_RENDER_GL
@@ -344,19 +332,16 @@ class FlxDrawStack implements IFlxDestroyable
 	}
 	
 	// TODO: add support for repeat (it's true by default)
-	// TODO: support color offsets for this method also
 	public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		// TODO: fix this...
-		var isColored:Bool = true;
-	//	var isColored:Bool = (transform != null && transform.hasRGBMultipliers());
+		var isColored:Bool = data.colored;
 		
-		var drawItem = getTrianglesCommand(	graphic, smoothing, isColored, blend, shader);
+		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader);
 		
-	//	drawItem.addTriangles(vertices, indices, uvtData, matrix, transform);
 		drawItem.data = data;
 		drawItem.matrix = matrix;
+		drawItem.color = transform;
 	}
 	
 	public function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,
