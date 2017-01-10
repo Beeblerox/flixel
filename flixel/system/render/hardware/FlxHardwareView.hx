@@ -1,6 +1,7 @@
 package flixel.system.render.hardware;
 
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.TrianglesData;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
@@ -8,7 +9,6 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.FlxCameraView;
 import flixel.system.render.common.FlxDrawStack;
-import flixel.system.render.hardware.gl.Triangles.TrianglesData;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;

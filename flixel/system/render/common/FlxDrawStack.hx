@@ -3,6 +3,7 @@ package flixel.system.render.common;
 import flash.display.Graphics;
 import flixel.FlxCamera;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.TrianglesData;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;

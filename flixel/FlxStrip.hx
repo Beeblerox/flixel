@@ -1,9 +1,9 @@
 package flixel;
 
+import flixel.graphics.TrianglesData;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.render.common.DrawItem.DrawData;
-import flixel.system.render.hardware.gl.Triangles.TrianglesData;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 
