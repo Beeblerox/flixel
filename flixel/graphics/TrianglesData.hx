@@ -2,12 +2,17 @@ package flixel.graphics;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+
+#if FLX_RENDER_GL
 import lime.graphics.GLRenderContext;
 import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 import openfl.utils.Float32Array;
+#end
+
+// TODO: fix this for flash target
 
 class TrianglesData implements IFlxDestroyable
 {
@@ -76,10 +81,7 @@ class TrianglesData implements IFlxDestroyable
 	
 	private var gl:GLRenderContext;
 	
-	public function new()
-	{
-		
-	}
+	public function new() { }
 	
 	public function destroy():Void
 	{

@@ -2,7 +2,6 @@ package flixel.system.render.hardware.gl;
 
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
-import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;

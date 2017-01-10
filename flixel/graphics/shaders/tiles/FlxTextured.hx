@@ -2,12 +2,7 @@ package flixel.graphics.shaders.tiles;
 
 import flixel.system.FlxAssets.FlxShader;
 
-/**
- * ...
- * @author Yanrishatum
- */
 // TODO: add texture size uniform
- 
 class FlxTextured extends FlxShader
 {
 	public static inline var defaultVertexSource:String = 
@@ -56,10 +51,11 @@ class FlxTextured extends FlxShader
 	{
 		super();
 		
+		#if FLX_RENDER_GL
 		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
 		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
 		__glSourceDirty = true;
+		#end
 	}
-
 }

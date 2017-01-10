@@ -2,10 +2,6 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.TrianglesData;
-import flixel.graphics.shaders.triangles.FlxColored;
-import flixel.graphics.shaders.triangles.FlxSingleColored;
-import flixel.graphics.shaders.triangles.FlxTextured;
-import flixel.graphics.shaders.triangles.FlxTexturedColored;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.util.FlxDestroyUtil;
@@ -15,12 +11,16 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 
 #if FLX_RENDER_GL
+import flixel.graphics.shaders.triangles.FlxColored;
+import flixel.graphics.shaders.triangles.FlxSingleColored;
+import flixel.graphics.shaders.triangles.FlxTextured;
+import flixel.graphics.shaders.triangles.FlxTexturedColored;
+
 import lime.math.Matrix4;
 import openfl.gl.GL;
 import lime.graphics.GLRenderContext;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLRenderer;
-#end
 
 class Triangles extends FlxDrawHardwareItem<Triangles>
 {
@@ -68,11 +68,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		color = null;
 	}
 	
-	#if flash
-	override public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void
-	#else
 	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
-	#end
 	{
 		this.worldTransform = worldTransform;
 		
@@ -98,11 +94,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 		return shader;
 	}
 	
-	#if flash
-	private function renderStrip(renderSession:Dynamic):Void
-	#else
 	private function renderStrip(renderSession:RenderSession):Void
-	#end
 	{
 		if (textured)
 		{
@@ -199,3 +191,12 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 			data.setContext(gl);
 	}
 }
+
+#else
+class Triangles extends FlxDrawHardwareItem<Triangles>
+{
+	public var data:TrianglesData;
+	public var matrix:Matrix;
+	public var color:ColorTransform;
+}
+#end

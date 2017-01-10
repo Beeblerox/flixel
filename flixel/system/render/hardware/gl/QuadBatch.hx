@@ -1,5 +1,6 @@
 package flixel.system.render.hardware.gl;
 
+#if FLX_RENDER_GL
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.shaders.tiles.FlxColored;
@@ -34,9 +35,6 @@ import openfl.utils.Float32Array;
  * ...
  * @author Zaphod
  */
-
-// TODO: remove colored quads, colored tiles should be drawn only with triangles...
-
 class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 {
 	public static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 6;
@@ -191,11 +189,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		}
 	}
 	
-	#if flash
-	override public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void
-	#else
 	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
-	#end
 	{
 		setContext(renderSession.gl);
 		
@@ -635,5 +629,18 @@ class RenderState implements IFlxDestroyable
 		this.texture = null;
 		this.blend = null;
 	}
-	
 }
+
+#else
+class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
+{
+	public static var BATCH_SIZE:Int;
+	
+	public var currentBatchSize(default, null):Int = 0;
+	
+	public function new(size:Int, textured:Bool = true) 
+	{ 
+		super();
+	}
+}
+#end

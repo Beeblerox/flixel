@@ -38,10 +38,12 @@ class FlxColored extends FlxShader
 	{
 		super();
 		
+		#if FLX_RENDER_GL
 		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
 		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
 		__glSourceDirty = true;
+		#end
 	}
 
 }
