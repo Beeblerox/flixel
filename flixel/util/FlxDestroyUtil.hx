@@ -78,7 +78,7 @@ class FlxDestroyUtil
 		return null;
 	}
 	
-	#if !macro
+#if !macro
 	/**
 	 * Checks if a BitmapData object is not null before calling dispose() on it, always returns null.
 	 * 
@@ -143,18 +143,17 @@ class FlxDestroyUtil
 		return null;
 	}
 	
+	#if FLX_RENDER_GL
 	public static function destroyBuffer(buffer:GLBuffer):GLBuffer
 	{
-		#if FLX_RENDER_GL
 		if (buffer != null)
-		{
 			GL.deleteBuffer(buffer);
-		}
-		#end
 		
 		return null;
 	}
 	#end
+	
+#end
 }
 
 interface IFlxDestroyable

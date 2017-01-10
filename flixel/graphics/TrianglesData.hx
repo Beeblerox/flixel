@@ -69,6 +69,7 @@ class TrianglesData implements IFlxDestroyable
 	public var colors(default, set):DrawData<FlxColor> = new DrawData<FlxColor>();
 	public var indices(default, set):DrawData<Int> = new DrawData<Int>();
 	
+	#if FLX_RENDER_GL
 	private var verticesArray:Float32Array;
 	private var uvsArray:Float32Array;
 	private var colorsArray:UInt32Array;
@@ -80,18 +81,19 @@ class TrianglesData implements IFlxDestroyable
 	private var indicesBuffer:GLBuffer;
 	
 	private var gl:GLRenderContext;
+	#end
 	
 	public function new() { }
 	
 	public function destroy():Void
 	{
-		gl = null;
-		
 		vertices = null;
 		uvs = null;
 		colors = null;
 		indices = null;
 		
+		#if FLX_RENDER_GL
+		gl = null;
 		verticesArray = null;
 		uvsArray = null;
 		colorsArray = null;
@@ -101,8 +103,50 @@ class TrianglesData implements IFlxDestroyable
 		uvsBuffer = FlxDestroyUtil.destroyBuffer(uvsBuffer);
 		colorsBuffer = FlxDestroyUtil.destroyBuffer(colorsBuffer);
 		indicesBuffer = FlxDestroyUtil.destroyBuffer(indicesBuffer);
+		#end
 	}
 	
+	private function set_vertices(value:DrawData<Float>):DrawData<Float>
+	{
+		verticesDirty = verticesDirty || (value != null);
+		return vertices = value;
+	}
+	
+	private function set_uvs(value:DrawData<Float>):DrawData<Float>
+	{
+		uvtDirty = uvtDirty || (value != null);
+		return uvs = value;
+	}
+	
+	private function set_colors(value:DrawData<FlxColor>):DrawData<FlxColor>
+	{
+		colorsDirty = colorsDirty || (value != null);
+		return colors = value;
+	}
+	
+	private function set_indices(value:DrawData<Int>):DrawData<Int>
+	{
+		indicesDirty = indicesDirty || (value != null);
+		return indices = value;
+	}
+	
+	private function set_dirty(value:Bool):Bool
+	{
+		verticesDirty = uvtDirty = colorsDirty = indicesDirty = value;
+		return dirty = value;
+	}
+	
+	private function get_numIndices():Int
+	{
+		return (indices != null) ? indices.length : 0;
+	}
+	
+	private function get_colored():Bool
+	{
+		return (colors != null) && (colors.length > 0);
+	}
+	
+	#if FLX_RENDER_GL
 	public function setContext(gl:GLRenderContext):Void
 	{
 		if (this.gl == null || this.gl != gl)
@@ -114,12 +158,6 @@ class TrianglesData implements IFlxDestroyable
 			colorsBuffer = GL.createBuffer();
 			indicesBuffer = GL.createBuffer();
 		}
-	}
-	
-	private function set_vertices(value:DrawData<Float>):DrawData<Float>
-	{
-		verticesDirty = verticesDirty || (value != null);
-		return vertices = value;
 	}
 	
 	public function updateVertices():Void
@@ -146,12 +184,6 @@ class TrianglesData implements IFlxDestroyable
 		}
 	}
 	
-	private function set_uvs(value:DrawData<Float>):DrawData<Float>
-	{
-		uvtDirty = uvtDirty || (value != null);
-		return uvs = value;
-	}
-	
 	public function updateUV():Void
 	{
 		if (uvs == null)
@@ -173,12 +205,6 @@ class TrianglesData implements IFlxDestroyable
 		{
 			GL.bindBuffer(GL.ARRAY_BUFFER, uvsBuffer);
 		}
-	}
-	
-	private function set_colors(value:DrawData<FlxColor>):DrawData<FlxColor>
-	{
-		colorsDirty = colorsDirty || (value != null);
-		return colors = value;
 	}
 	
 	public function updateColors():Void
@@ -205,12 +231,6 @@ class TrianglesData implements IFlxDestroyable
 		}
 	}
 	
-	private function set_indices(value:DrawData<Int>):DrawData<Int>
-	{
-		indicesDirty = indicesDirty || (value != null);
-		return indices = value;
-	}
-	
 	public function updateIndices():Void
 	{
 		if (indices == null)
@@ -234,20 +254,5 @@ class TrianglesData implements IFlxDestroyable
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, indicesBuffer);
 		}
 	}
-	
-	private function set_dirty(value:Bool):Bool
-	{
-		verticesDirty = uvtDirty = colorsDirty = indicesDirty = value;
-		return dirty = value;
-	}
-	
-	private function get_numIndices():Int
-	{
-		return (indicesArray != null) ? indicesArray.length : 0;
-	}
-	
-	private function get_colored():Bool
-	{
-		return (colors != null) && (colors.length > 0);
-	}
+	#end
 }

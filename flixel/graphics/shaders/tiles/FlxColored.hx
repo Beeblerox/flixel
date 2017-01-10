@@ -19,7 +19,7 @@ class FlxColored extends FlxShader
 			
 			void main(void) 
 			{
-				vColor = aColor;
+				vColor = aColor.bgra;
 				gl_Position = uMatrix * aPosition;
 			}";
 			
