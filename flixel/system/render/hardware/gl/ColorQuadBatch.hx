@@ -38,7 +38,7 @@ import openfl.utils.Float32Array;
 
 class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 {
-	public static inline var ELEMENTS_PER_VERTEX:Int = 6;
+	public static inline var ELEMENTS_PER_VERTEX:Int = 4;
 	
 	public static var BATCH_SIZE:Int = 2000;
 	
@@ -56,6 +56,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	/**
 	 * Default tile shader.
 	 */
+	
+	// TODO: change this shader
 	private static var defaultShader:FlxTextured = new FlxTextured();
 	
 	/**
@@ -209,29 +211,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		flush();
 	}
 	
-	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
+	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
 	{
-		addUVQuad(frame.parent, frame.frame, frame.uv, matrix, transform, blend, smoothing);
-	}
-	
-	override public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
-	{
-		/*
 		// check texture..
-		if (currentBatchSize > size)
-		{
-			flush();
-			currentTexture = texture;
-		}
-		*/
+	//	if (currentBatchSize > size)
+	//	{
+	//		flush();
+	//		currentTexture = texture;
+	//	}
 		
-		// get the uvs for the texture
-		var uvx:Float = uv.x;
-		var uvy:Float = uv.y;
-		var uvx2:Float = uv.width;
-		var uvy2:Float = uv.height;
-		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * QuadBatch.ELEMENTS_PER_VERTEX;
+		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -255,16 +244,16 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			positions[i + 1] = intY; 						// 0 * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 6] = w * a + intX;				// w * a + 0 * c + tx | 0;
-			positions[i + 7] = w * b + intY;				// w * b + 0 * d + ty | 0;
+			positions[i + 3] = w * a + intX;				// w * a + 0 * c + tx | 0;
+			positions[i + 4] = w * b + intY;				// w * b + 0 * d + ty | 0;
 			
 			// xy
-			positions[i + 12] = h * c + intX;				// 0 * a + h * c + tx | 0;
-			positions[i + 13] = h * d + intY;				// 0 * b + h * d + ty | 0;
+			positions[i + 6] = h * c + intX;				// 0 * a + h * c + tx | 0;
+			positions[i + 7] = h * d + intY;				// 0 * b + h * d + ty | 0;
 			
 			// xy
-			positions[i + 18] = w * a + h * c + intX;
-			positions[i + 19] = w * b + h * d + intY;
+			positions[i + 9] = w * a + h * c + intX;
+			positions[i + 10] = w * b + h * d + intY;
 		}
 		else
 		{
@@ -273,58 +262,23 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 			positions[i + 1] = ty;
 			
 			// xy
-			positions[i + 6] = w * a + tx;
-			positions[i + 7] = w * b + ty;
+			positions[i + 3] = w * a + tx;
+			positions[i + 4] = w * b + ty;
 			
 			// xy
-			positions[i + 12] = h * c + tx;
-			positions[i + 13] = h * d + ty;
+			positions[i + 6] = h * c + tx;
+			positions[i + 7] = h * d + ty;
 			
 			// xy
-			positions[i + 18] = w * a + h * c + tx;
-			positions[i + 19] = w * b + h * d + ty;
+			positions[i + 9] = w * a + h * c + tx;
+			positions[i + 10] = w * b + h * d + ty;
 		}
 		
-		// uv
-		positions[i + 2] = uvx;
-		positions[i + 3] = uvy;
-		
-		// uv
-		positions[i + 8] = uvx2;
-		positions[i + 9] = uvy;
-		
-		// uv
-		positions[i + 14] = uvx;
-		positions[i + 15] = uvy2;
-		
-		// uv
-		positions[i + 20] = uvx2;
-		positions[i + 21] = uvy2;
-		
-		var tint = 0xFFFFFF, color = 0xFFFFFFFF;
-		
-		if (transform != null)
-		{
-			tint = Std.int(transform.redMultiplier * 255) << 16 | Std.int(transform.greenMultiplier * 255) << 8 | Std.int(transform.blueMultiplier * 255);
-			color = (Std.int(transform.alphaMultiplier * 255) & 0xFF) << 24 | tint;
-		}
-		
-		colors[i + 4] = colors[i + 10] = colors[i + 16] = colors[i + 22] = color;
-		
-		tint = 0x000000;
-		color = 0x00000000;
-		
-		// update color offsets
-		if (transform != null)
-		{
-			tint = Std.int(transform.redOffset) << 16 | Std.int(transform.greenOffset) << 8 | Std.int(transform.blueOffset);
-			color = (Std.int(transform.alphaOffset) & 0xFF) << 24 | tint;
-		}
-		
-		colors[i + 5] = colors[i + 11] = colors[i + 17] = colors[i + 23] = color;
+		color.alphaFloat = alpha;
+		colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = color;
 		
 		var state:RenderState = states[currentBatchSize];
-		state.set(texture, blend, smoothing);
+		state.set(null, null, blend, false);
 		
 		currentBatchSize++;
 	}

@@ -209,9 +209,12 @@ class FlxDrawStack implements IFlxDestroyable
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
 	{
 		#if FLX_RENDER_GL
+		// TODO: fix this...
+		/*
 		_helperMatrix.identity();
 		var drawItem = startQuadBatch(null, true, false);
 		drawItem.addColorQuad(rect, _helperMatrix, color, alpha);
+		*/
 		#else
 		var graphic:Graphics = view.canvas.graphics;
 		var camera:FlxCamera = view.camera;
@@ -331,12 +334,16 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	public function drawColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool = false, ?shader:FlxShader):Void
 	{
+		// TODO: fix this...
+		
+		/*
 		#if (openfl >= "4.0.0")
 		var drawItem = startQuadBatch(null, true, false, blend, smoothing, shader);
 		#else
 		var drawItem = getNewDrawTrianglesItem(null, smoothing, true, blend, shader);
 		#end
 		drawItem.addColorQuad(rect, matrix, color, alpha, blend, smoothing);
+		*/
 		
 	}
 }

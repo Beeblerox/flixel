@@ -13,6 +13,9 @@ class FlxTexturedColored extends FlxShader
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
 			
+			varying vec2 vTexCoord;
+			varying vec4 vColor;
+			
 			void main(void) 
 			{
 				vTexCoord = aTexCoord;
