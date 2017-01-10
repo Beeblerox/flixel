@@ -25,7 +25,6 @@ import openfl.geom.Rectangle;
 // TODO: try to add general vertex and index arrays to minimize data upload operations (gl.bufferData() calls). Like it's done in GL implementation of Tilemap renderer...
 // TODO: multitexture batching...
 // TODO: sprite materials with multiple textures...
-// TODO: support for colorOffsets???
 
 /**
  * Display object for actual rendering for openfl 4 in tile render mode.
@@ -49,19 +48,9 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	
 	private var _renderHelper:GLRenderHelper;
 	
-	// TODO: remove this var...
-	var testSprite:FlxSprite;
-	
-//	public var batcher:QuadBatch;
-	
 	public function new(width:Int, height:Int)
 	{
 		super();
-		
-		testSprite = new FlxSprite();
-		testSprite.makeGraphic(100, 200, FlxColor.GREEN);
-		
-	//	batcher = new QuadBatch();
 		
 		__width = width;
 		__height = height;
@@ -84,7 +73,6 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		if (_renderHelper != null)
 		{
 			// TODO: fix this...
-			
 			_renderHelper.resize(Math.ceil(__width * FlxG.camera.initialZoom), Math.ceil(__height * FlxG.camera.initialZoom));
 			//_renderHelper.resize(__width, __height);
 		}
@@ -198,10 +186,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		while (i < stateNum)
 		{
-			var state:FlxDrawHardwareItem<Dynamic> = states[i];
-			
-			// TODO: fix this...
-			state.renderGL(transform, renderSession);
+			states[i].renderGL(transform, renderSession);
 			i++;
 		}
 		
@@ -210,17 +195,6 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
-			
-		/*
-		batcher.begin(this, renderSession);
-		var matrix = new FlxMatrix();
-		batcher.addQuad(testSprite.frame, matrix);
-		
-		matrix.translate(150, 10);
-		batcher.addQuad(testSprite.frame, matrix);
-		
-		batcher.end();
-		*/
 	}
 	
 	private function get_renderHelper():GLRenderHelper

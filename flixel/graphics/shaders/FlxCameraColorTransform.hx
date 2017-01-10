@@ -1,7 +1,7 @@
 package flixel.graphics.shaders;
 import flixel.system.FlxAssets.FlxShader;
 
-// TODO: implement it...
+// TODO: use it...
 class FlxCameraColorTransform extends FlxShader
 {
 	public static inline var defaultVertexSource:String = 
