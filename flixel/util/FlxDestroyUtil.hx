@@ -4,11 +4,14 @@ import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flixel.util.FlxPool.IFlxPooled;
-import openfl.display.Shader;
 import openfl.gl.GLBuffer;
 
 #if FLX_RENDER_GL
 import openfl.gl.GL;
+#end
+
+#if !openfl_legacy
+import openfl.display.Shader;
 #end
 
 class FlxDestroyUtil
@@ -121,6 +124,7 @@ class FlxDestroyUtil
 		return null;
 	}
 	
+	#if !openfl_legacy
 	public static function destroyShader(shader:Shader):Shader
 	{
 		#if FLX_RENDER_GL
@@ -142,6 +146,7 @@ class FlxDestroyUtil
 		
 		return null;
 	}
+	#end
 	
 	#if FLX_RENDER_GL
 	public static function destroyBuffer(buffer:GLBuffer):GLBuffer

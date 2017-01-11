@@ -6,10 +6,9 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
-import flixel.system.render.common.DrawItem.FlxDrawQuadsItem;
-import flixel.system.render.common.DrawItem.FlxDrawTrianglesItem;
+import flixel.system.render.common.DrawItem.FlxDrawQuadsCommand;
+import flixel.system.render.common.DrawItem.FlxDrawTrianglesCommand;
 import flixel.system.render.hardware.FlxHardwareView;
-import flixel.system.render.hardware.gl.QuadBatch;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
@@ -64,27 +63,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		}
 	}
 	#end
-	
-	public static function canAddQuadToQuadsItem(item:FlxDrawQuadsItem):Bool
-	{
-		return item.currentBatchSize < QuadBatch.BATCH_SIZE;
-	//	return ((item.numTiles + 1) <= FlxCameraView.TILES_PER_BATCH);
-	}
-	
-	public static function canAddQuadToTrianglesItem(item:FlxDrawTrianglesItem):Bool
-	{
-		return true;
-	//	return canAddTrianglesToTrianglesItem(item, FlxCameraView.VERTICES_PER_TILE, FlxCameraView.INDICES_PER_TILE);
-	}
-	
-	public static function canAddTrianglesToTrianglesItem(item:FlxDrawTrianglesItem, numVertices:Int, numIndices:Int):Bool
-	{
-		return true;
-		/*
-		return 	((item.numVertices + numVertices) <= FlxCameraView.VERTICES_PER_BATCH) &&
-				((item.indexPos + numIndices) <= FlxCameraView.INDICES_PER_BATCH);
-		*/
-	}
 	
 	public var nextTyped:T;
 	

@@ -101,6 +101,12 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		FlxCameraView._DRAWCALLS++;
 	}
 	
+	public function canAddQuad():Bool
+	{
+		// TODO: fix this...
+		return ((numTiles + 1) <= FlxCameraView.TILES_PER_BATCH);
+	}
+	
 	private function get_numTiles():Int
 	{
 		return Std.int(position / elementsPerTile);

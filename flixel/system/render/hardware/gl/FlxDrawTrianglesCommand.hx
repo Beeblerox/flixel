@@ -22,7 +22,7 @@ import lime.graphics.GLRenderContext;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLRenderer;
 
-class Triangles extends FlxDrawHardwareItem<Triangles>
+class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesCommand>
 {
 	private static var matrix4:Matrix4 = new Matrix4();
 	
@@ -193,7 +193,7 @@ class Triangles extends FlxDrawHardwareItem<Triangles>
 }
 
 #else
-class Triangles extends FlxDrawHardwareItem<Triangles>
+class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesCommand>
 {
 	public var data:TrianglesData;
 	public var matrix:Matrix;

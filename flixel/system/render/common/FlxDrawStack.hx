@@ -10,9 +10,9 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.DrawData;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
+import flixel.system.render.common.DrawItem.FlxDrawQuadsCommand;
+import flixel.system.render.common.DrawItem.FlxDrawTrianglesCommand;
 import flixel.system.render.hardware.FlxHardwareView;
-import flixel.system.render.hardware.gl.QuadBatch;
-import flixel.system.render.hardware.gl.Triangles;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -24,7 +24,7 @@ import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
-// TODO: add method for drawing color triangles...
+// TODO: make it work with openfl 3.6.1 with "next" flag and without it...
 
 /**
  * ...
@@ -44,32 +44,32 @@ class FlxDrawStack implements IFlxDestroyable
 	/**
 	 * Last draw tiles item
 	 */
-	private var _lastTexturedTiles:QuadBatch;
+	private var _lastTexturedTiles:FlxDrawQuadsCommand;
 	/**
 	 * Last draw tiles item
 	 */
-	private var _lastColoredTiles:QuadBatch;
+	private var _lastColoredTiles:FlxDrawQuadsCommand;
 	/**
 	 * Last draw triangles item
 	 */
-	private var _lastTriangles:Triangles;
+	private var _lastTriangles:FlxDrawTrianglesCommand;
 	
 	public var view:FlxHardwareView;
 	
 	/**
 	 * Draw tiles stack items that can be reused
 	 */
-	private static var _texturedTilesStorage:QuadBatch;
+	private static var _texturedTilesStorage:FlxDrawQuadsCommand;
 	
 	/**
 	 * Draw tiles stack items that can be reused
 	 */
-	private static var _coloredTilesStorage:QuadBatch;
+	private static var _coloredTilesStorage:FlxDrawQuadsCommand;
 	
 	/**
 	 * Draw triangles stack items that can be reused
 	 */
-	private static var _trianglesStorage:Triangles;
+	private static var _trianglesStorage:FlxDrawTrianglesCommand;
 	
 	private var _helperMatrix:FlxMatrix = new FlxMatrix();
 	
@@ -108,11 +108,11 @@ class FlxDrawStack implements IFlxDestroyable
 	public function getTexturedTilesCommand(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
 		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	{
-		var itemToReturn:QuadBatch = null;
+		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentDrawItem != null
 			&& _currentDrawItem.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader)
-			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_lastTexturedTiles))
+			&& _lastTexturedTiles.canAddQuad)
 		{
 			return _lastTexturedTiles;
 		}
@@ -120,13 +120,13 @@ class FlxDrawStack implements IFlxDestroyable
 		if (_texturedTilesStorage != null)
 		{
 			itemToReturn = _texturedTilesStorage;
-			var newHead:QuadBatch = _texturedTilesStorage.nextTyped;
+			var newHead:FlxDrawQuadsCommand = _texturedTilesStorage.nextTyped;
 			itemToReturn.reset();
 			_texturedTilesStorage = newHead;
 		}
 		else
 		{
-			itemToReturn = new QuadBatch(QuadBatch.BATCH_SIZE, true);
+			itemToReturn = new FlxDrawQuadsCommand(FlxDrawQuadsCommand.BATCH_SIZE, true);
 		}
 		
 		itemToReturn.set(graphic, colored, hasColorOffsets, blend, smooth, shader);
@@ -152,11 +152,11 @@ class FlxDrawStack implements IFlxDestroyable
 	@:noCompletion
 	public function getColoredTilesCommand(?blend:BlendMode, ?shader:FlxShader)
 	{
-		var itemToReturn:QuadBatch = null;
+		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentDrawItem != null
 			&& _currentDrawItem.equals(FlxDrawItemType.TILES, null, true, false, blend, false, shader)
-			&& FlxDrawBaseItem.canAddQuadToQuadsItem(_lastColoredTiles))
+			&& _lastColoredTiles.canAddQuad)
 		{
 			return _lastColoredTiles;
 		}
@@ -164,13 +164,13 @@ class FlxDrawStack implements IFlxDestroyable
 		if (_coloredTilesStorage != null)
 		{
 			itemToReturn = _coloredTilesStorage;
-			var newHead:QuadBatch = _coloredTilesStorage.nextTyped;
+			var newHead:FlxDrawQuadsCommand = _coloredTilesStorage.nextTyped;
 			itemToReturn.reset();
 			_coloredTilesStorage = newHead;
 		}
 		else
 		{
-			itemToReturn = new QuadBatch(QuadBatch.BATCH_SIZE, false);
+			itemToReturn = new FlxDrawQuadsCommand(FlxDrawQuadsCommand.BATCH_SIZE, false);
 		}
 		
 		itemToReturn.set(null, true, false, blend, false, shader);
@@ -195,20 +195,20 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	@:noCompletion
 	public function getTrianglesCommand(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):Triangles
+		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesCommand
 	{
-		var itemToReturn:Triangles = null;
+		var itemToReturn:FlxDrawTrianglesCommand = null;
 		
 		if (_trianglesStorage != null)
 		{
 			itemToReturn = _trianglesStorage;
-			var newHead:Triangles = _trianglesStorage.nextTyped;
+			var newHead:FlxDrawTrianglesCommand = _trianglesStorage.nextTyped;
 			itemToReturn.reset();
 			_trianglesStorage = newHead;
 		}
 		else
 		{
-			itemToReturn = new Triangles();
+			itemToReturn = new FlxDrawTrianglesCommand();
 		}
 		
 		itemToReturn.set(graphic, colored, false, blend, smooth, shader);
@@ -250,8 +250,8 @@ class FlxDrawStack implements IFlxDestroyable
 	@:noCompletion
 	public function clearDrawStack():Void
 	{	
-		var currTiles:QuadBatch = _lastTexturedTiles;
-		var newTilesHead:QuadBatch;
+		var currTiles:FlxDrawQuadsCommand = _lastTexturedTiles;
+		var newTilesHead:FlxDrawQuadsCommand;
 		
 		while (currTiles != null)
 		{
@@ -273,8 +273,8 @@ class FlxDrawStack implements IFlxDestroyable
 			currTiles = newTilesHead;
 		}
 		
-		var currTriangles:Triangles = _lastTriangles;
-		var newTrianglesHead:Triangles;
+		var currTriangles:FlxDrawTrianglesCommand = _lastTriangles;
+		var newTrianglesHead:FlxDrawTrianglesCommand;
 		
 		while (currTriangles != null)
 		{

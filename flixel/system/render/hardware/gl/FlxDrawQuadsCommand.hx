@@ -35,7 +35,7 @@ import openfl.utils.Float32Array;
  * ...
  * @author Zaphod
  */
-class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
+class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 {
 	public static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 6;
 	
@@ -109,6 +109,8 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	 */
 	public var currentBatchSize(default, null):Int = 0;
 	
+	public var canAddQuad(get, null):Bool;
+	
 	private var dirty:Bool = true;
 	
 	/**
@@ -134,7 +136,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		
 		this.size = size;
 		
-		var elementsPerVertex:Int = (textured) ? QuadBatch.ELEMENTS_PER_TEXTURED_VERTEX : QuadBatch.ELEMENTS_PER_COLORED_VERTEX;
+		var elementsPerVertex:Int = (textured) ? FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX : FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
 		
 		// The total number of bytes in our batch
 		var numBytes:Int = size * Float32Array.BYTES_PER_ELEMENT * VERTICES_PER_QUAD * elementsPerVertex;
@@ -215,7 +217,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 	//		currentTexture = texture;
 	//	}
 		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * QuadBatch.ELEMENTS_PER_COLORED_VERTEX;
+		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -301,7 +303,7 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		var uvx2:Float = uv.width;
 		var uvy2:Float = uv.height;
 		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * QuadBatch.ELEMENTS_PER_TEXTURED_VERTEX;
+		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -600,9 +602,14 @@ class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
 		return bothHasGraphic && hasSameShader;
 	}
 	
+	private function get_canAddQuad():Bool
+	{
+		return currentBatchSize < FlxDrawQuadsCommand.BATCH_SIZE;
+	}
+	
 	override private function get_elementsPerVertex():Int
 	{
-		return (textured) ? QuadBatch.ELEMENTS_PER_TEXTURED_VERTEX : QuadBatch.ELEMENTS_PER_COLORED_VERTEX;
+		return (textured) ? FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX : FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
 	}
 }
 
@@ -632,11 +639,13 @@ class RenderState implements IFlxDestroyable
 }
 
 #else
-class QuadBatch extends FlxDrawHardwareItem<QuadBatch>
+class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 {
 	public static var BATCH_SIZE:Int;
 	
 	public var currentBatchSize(default, null):Int = 0;
+	
+	public var canAddQuad(default, null):Bool = false;
 	
 	public function new(size:Int, textured:Bool = true) 
 	{ 
