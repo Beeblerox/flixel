@@ -37,22 +37,11 @@ import openfl.utils.Float32Array;
  */
 class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 {
-	public static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 6;
+	private static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 6;
 	
-	public static inline var ELEMENTS_PER_COLORED_VERTEX:Int = 3;
+	private static inline var ELEMENTS_PER_COLORED_VERTEX:Int = 3;
 	
-	public static var BATCH_SIZE:Int = 2000;
-	
-	/**
-	 * Number of vertices per one quad.
-	 */
-	public static inline var VERTICES_PER_QUAD:Int = 4;
-	/**
-	 * Number of indices per one quad.
-	 */
-	public static inline var INDICES_PER_QUAD:Int = 6;
-	
-	public static inline var BYTES_PER_INDEX:Int = 2;
+	private static inline var BYTES_PER_INDEX:Int = 2;
 	
 	/**
 	 * Default tile shader.
@@ -139,9 +128,9 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		var elementsPerVertex:Int = (textured) ? FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX : FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
 		
 		// The total number of bytes in our batch
-		var numBytes:Int = size * Float32Array.BYTES_PER_ELEMENT * VERTICES_PER_QUAD * elementsPerVertex;
+		var numBytes:Int = size * Float32Array.BYTES_PER_ELEMENT * FlxCameraView.VERTICES_PER_QUAD * elementsPerVertex;
 		// The total number of indices in our batch
-		var numIndices:Int = size * INDICES_PER_QUAD;
+		var numIndices:Int = size * FlxCameraView.INDICES_PER_QUAD;
 		
 		vertices = new ArrayBuffer(numBytes);
 		positions = new Float32Array(vertices);
@@ -160,8 +149,8 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 			this.indices[indexPos + 4] = index + 3;
 			this.indices[indexPos + 5] = index + 2;
 			
-			indexPos += INDICES_PER_QUAD;
-			index += VERTICES_PER_QUAD;
+			indexPos += FlxCameraView.INDICES_PER_QUAD;
+			index += FlxCameraView.VERTICES_PER_QUAD;
 		}
 		
 		for (i in 0...size)
@@ -543,7 +532,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		// now draw those suckas!
-		GL.drawElements(GL.TRIANGLES, size * INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * INDICES_PER_QUAD * BYTES_PER_INDEX);
+		GL.drawElements(GL.TRIANGLES, size * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * FlxCameraView.INDICES_PER_QUAD * BYTES_PER_INDEX);
 	}
 	
 	public function start():Void
@@ -604,7 +593,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	
 	private function get_canAddQuad():Bool
 	{
-		return currentBatchSize < FlxDrawQuadsCommand.BATCH_SIZE;
+		return currentBatchSize < FlxCameraView.QUADS_PER_BATCH;
 	}
 	
 	override private function get_elementsPerVertex():Int
@@ -616,7 +605,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 class RenderState implements IFlxDestroyable
 {
 	public var blend:BlendMode;
-	public var smoothing:Bool;
+	public var smoothing:Bool; // TODO: change texture filtering if smoothing changes..
 	public var texture:FlxGraphic;
 	
 	public var startIndex:Int = 0;

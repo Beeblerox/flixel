@@ -126,7 +126,7 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 		else
 		{
-			itemToReturn = new FlxDrawQuadsCommand(FlxDrawQuadsCommand.BATCH_SIZE, true);
+			itemToReturn = new FlxDrawQuadsCommand(FlxCameraView.QUADS_PER_BATCH, true);
 		}
 		
 		itemToReturn.set(graphic, colored, hasColorOffsets, blend, smooth, shader);
@@ -170,7 +170,7 @@ class FlxDrawStack implements IFlxDestroyable
 		}
 		else
 		{
-			itemToReturn = new FlxDrawQuadsCommand(FlxDrawQuadsCommand.BATCH_SIZE, false);
+			itemToReturn = new FlxDrawQuadsCommand(FlxCameraView.QUADS_PER_BATCH, false);
 		}
 		
 		itemToReturn.set(null, true, false, blend, false, shader);
@@ -350,11 +350,11 @@ class FlxDrawStack implements IFlxDestroyable
 	{
 		var isColored = (transform != null && transform.hasRGBMultipliers());
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
-		#if (openfl >= "4.0.0")
+	//	#if (openfl >= "4.0.0")
 		var drawItem = getTexturedTilesCommand(graphic, isColored, hasColorOffsets, blend, smoothing, shader);
-		#else
-		var drawItem = startTrianglesBatch(graphic, smoothing, isColored, blend, shader, FlxCameraView.VERTICES_PER_TILE, FlxCameraView.INDICES_PER_TILE);
-		#end
+	//	#else
+	//	var drawItem = startTrianglesBatch(graphic, smoothing, isColored, blend, shader, FlxCameraView.VERTICES_PER_TILE, FlxCameraView.INDICES_PER_TILE);
+	//	#end
 		
 		if (hasColorOffsets)
 			drawItem.setOffsets(transform);

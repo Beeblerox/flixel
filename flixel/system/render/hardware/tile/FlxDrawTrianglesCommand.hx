@@ -55,7 +55,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 		if (numTriangles <= 0)
 			return;
 		
-		if (graphics == null)
+		if (!textured)
 		{
 			view.canvas.graphics.beginFill(color, alpha);
 			view.canvas.graphics.drawTriangles(vertices, indices, null, TriangleCulling.NONE);
@@ -177,12 +177,12 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 		}
 	}
 	
-	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
-		addUVQuad(frame.frame, frame.uv, matrix, transform);
+		addUVQuad(frame.parent, frame.frame, frame.uv, matrix, transform, blend, smoothing);
 	}
 	
-	override public function addUVQuad(rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	override public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
 		var prevVerticesPos:Int = vertexPos;
 		var prevIndicesPos:Int = indexPos;
@@ -265,15 +265,20 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 		vertexPos += 8;
 		indexPos += 6;
 	}
-	
+	/*
 	override private function get_numVertices():Int
 	{
 		return Std.int(vertexPos / elementsPerVertex);
 	}
-	
+	*/
 	override private function get_numTriangles():Int
 	{
-		return Std.int(indexPos / 3);
+		return Std.int(indexPos / FlxCameraView.INDICES_PER_TRIANGLE);
+	}
+	
+	public function canAddTriangles(numTriangles:Int):Bool
+	{
+		return (this.numTriangles + numTriangles <= FlxCameraView.TRIANGLES_PER_BATCH);
 	}
 	
 	override function get_elementsPerVertex():Int 

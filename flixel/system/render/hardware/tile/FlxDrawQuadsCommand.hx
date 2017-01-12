@@ -7,18 +7,23 @@ import flixel.math.FlxRect;
 import flixel.system.render.common.FlxCameraView;
 import flixel.system.render.common.FlxDrawBaseItem;
 import flixel.system.render.hardware.FlxHardwareView;
+import flash.display.BlendMode;
 import openfl.display.Tilesheet;
-import openfl.geom.ColorTransform;
+import flash.geom.ColorTransform;
 
 class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 {
+	public var size(default, null):Int = 2000;
+	
 	public var drawData:Array<Float> = [];
 	public var position:Int = 0;
-	public var numTiles(get, never):Int;
+	public var currentBatchSize(get, never):Int;
 	
-	public function new() 
+	public function new(size:Int = 2000, textured:Bool = true) 
 	{
 		super();
+		
+		this.size = size;
 		type = FlxDrawItemType.TILES;
 	}
 	
@@ -34,7 +39,7 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 		drawData = null;
 	}
 	
-	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
 	{
 		setNext(matrix.tx);
 		setNext(matrix.ty);
@@ -94,7 +99,7 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 		flags |= FlxDrawBaseItem.blendToInt(blending);
 		
 		view.canvas.graphics.drawTiles(graphics.tilesheet, drawData,
-			(view.antialiasing || antialiasing), flags,
+			(view.smoothing || smoothing), flags,
 			#if (!openfl_legacy && openfl >= "3.3.9") shader, #end
 			position);
 		
@@ -104,10 +109,10 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 	public function canAddQuad():Bool
 	{
 		// TODO: fix this...
-		return ((numTiles + 1) <= FlxCameraView.TILES_PER_BATCH);
+		return ((currentBatchSize + 1) <= FlxCameraView.QUADS_PER_BATCH);
 	}
 	
-	private function get_numTiles():Int
+	private function get_currentBatchSize():Int
 	{
 		return Std.int(position / elementsPerTile);
 	}
@@ -127,11 +132,11 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 	
 	override private function get_numVertices():Int
 	{
-		return FlxCameraView.VERTICES_PER_TILE * numTiles; 
+		return FlxCameraView.VERTICES_PER_QUAD * currentBatchSize; 
 	}
 	
 	override private function get_numTriangles():Int
 	{
-		return 2 * numTiles;
+		return 2 * currentBatchSize;
 	}
 }
