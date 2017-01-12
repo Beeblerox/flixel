@@ -19,6 +19,8 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 	public var position:Int = 0;
 	public var currentBatchSize(get, never):Int;
 	
+	public var canAddQuad(get, null):Bool;
+	
 	public function new(size:Int = 2000, textured:Bool = true) 
 	{
 		super();
@@ -106,9 +108,8 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 		FlxCameraView._DRAWCALLS++;
 	}
 	
-	public function canAddQuad():Bool
+	private function get_canAddQuad():Bool
 	{
-		// TODO: fix this...
 		return ((currentBatchSize + 1) <= FlxCameraView.QUADS_PER_BATCH);
 	}
 	

@@ -111,7 +111,7 @@ class FlxDrawStack implements IFlxDestroyable
 		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentCommand != null
-			&& _currentCommand.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader)
+			&& _currentCommand.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader) 
 			&& _lastTexturedQuads.canAddQuad)
 		{
 			return _lastTexturedQuads;
@@ -155,7 +155,7 @@ class FlxDrawStack implements IFlxDestroyable
 		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentCommand != null
-			&& _currentCommand.equals(FlxDrawItemType.TILES, null, true, false, blend, false, shader)
+			&& _currentCommand.equals(FlxDrawItemType.TILES, null, true, false, blend, false, shader) 
 			&& _lastColoredQuads.canAddQuad)
 		{
 			return _lastColoredQuads;
@@ -194,7 +194,7 @@ class FlxDrawStack implements IFlxDestroyable
 	}
 	
 	@:noCompletion
-	public function getTrianglesCommand(graphic:FlxGraphic, smooth:Bool = false,
+	public function getNewTrianglesCommand(graphic:FlxGraphic, smooth:Bool = false,
 		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesCommand
 	{
 		var itemToReturn:FlxDrawTrianglesCommand = null;
@@ -231,29 +231,25 @@ class FlxDrawStack implements IFlxDestroyable
 		return itemToReturn;
 	}
 	
-	/*
 	@:noCompletion
-	
 	public function getTrianglesCommand(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesCommand
-	
-	public function startTrianglesBatch(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader, numTriangles:Int):FlxDrawTrianglesItem
+		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader, numTriangles:Int):FlxDrawTrianglesCommand
 	{
 		if (!FlxCameraView.BATCH_TRIANGLES)
 		{
-			return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
+			return getNewTrianglesCommand(graphic, smooth, colored, blend, shader);
 		}
 		else if (_currentCommand != null
 			&& _currentCommand.equals(FlxDrawItemType.TRIANGLES, graphic, colored, false, blend, smooth, shader)
-			&& FlxDrawBaseItem.canAddTrianglesToTrianglesItem(_headTriangles, numVertices, numIndices))
+			&& _lastTriangles.canAddTriangles(numTriangles))
 		{	
-			return _headTriangles;
+			return _lastTriangles;
 		}
 		
-		return getNewDrawTrianglesItem(graphic, smooth, colored, blend, shader);
+		return getNewTrianglesCommand(graphic, smooth, colored, blend, shader);
 	}
 	
+	/*
 	@:noCompletion
 	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smooth:Bool = false,
 		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesItem
@@ -400,11 +396,9 @@ class FlxDrawStack implements IFlxDestroyable
 	public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		var isColored:Bool = data.colored;
-		
-		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader);
-		
 		#if FLX_RENDER_GL
+		var isColored:Bool = data.colored;
+		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader);
 		drawItem.data = data;
 		drawItem.matrix = matrix;
 		drawItem.color = transform;
