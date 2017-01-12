@@ -10,7 +10,7 @@ import flixel.system.render.hardware.FlxHardwareView;
 import openfl.display.Tilesheet;
 import openfl.geom.ColorTransform;
 
-class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
+class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 {
 	public var drawData:Array<Float> = [];
 	public var position:Int = 0;

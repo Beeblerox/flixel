@@ -139,7 +139,7 @@ class FlxBlitView extends FlxCameraView
 		//	_bitmap.bitmapData = pixels;
 		//	buffer.draw(_bitmap, matrix, null, blend, null, (smoothing || antialiasing));
 		//	#else
-			buffer.draw(pixels, matrix, null, blend, null, (smoothing || antialiasing));
+			buffer.draw(pixels, matrix, null, blend, null, (smoothing || smoothing));
 		//	#end
 		}
 		else

@@ -103,7 +103,7 @@ class FlxCameraView implements IFlxDestroyable
 	/**
 	 * Camera's smoothing.
 	 */
-	public var antialiasing(get, set):Bool;
+	public var smoothing(get, set):Bool;
 	/**
 	 * Camera's tint factor
 	 */
@@ -250,14 +250,14 @@ class FlxCameraView implements IFlxDestroyable
 		return Alpha;
 	}
 	
-	private function set_antialiasing(Antialiasing:Bool):Bool
+	private function set_smoothing(Smoothing:Bool):Bool
 	{
-		return Antialiasing;
+		return Smoothing;
 	}
 	
-	private function get_antialiasing():Bool
+	private function get_smoothing():Bool
 	{
-		return camera.antialiasing;
+		return camera.smoothing;
 	}
 	
 	private function get_visible():Bool

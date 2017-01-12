@@ -21,7 +21,7 @@ import openfl.geom.ColorTransform;
  * ...
  * @author Zaphod
  */
-class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
+class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 {
 	private static var point:FlxPoint = FlxPoint.get();
 	private static var rect:FlxRect = FlxRect.get();
@@ -62,7 +62,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		}
 		else
 		{
-			view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (view.antialiasing || antialiasing));
+			view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (view.smoothing || smoothing));
 			#if !openfl_legacy
 			view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
 			#else
@@ -115,7 +115,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			&& this.graphics == graphic 
 			&& this.colored == colored
 			&& this.blending == blend
-			&& this.antialiasing == smooth);
+			&& this.smoothing == smooth);
 	}
 	
 	public function addTriangles(vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?matrix:FlxMatrix, ?transform:ColorTransform):Void
