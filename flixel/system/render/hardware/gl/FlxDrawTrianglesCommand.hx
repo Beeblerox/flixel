@@ -191,6 +191,11 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 			data.setContext(gl);
 	}
 	
+	public function canAddTriangles(numTriangles:Int):Bool
+	{
+		return true;
+	}
+	
 	override private function get_numVertices():Int
 	{
 		return (data != null) ? data.numIndices : 0;
