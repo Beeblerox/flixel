@@ -2,8 +2,11 @@ package flixel.system.render.hardware.gl;
 
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.TrianglesData;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import openfl.display.BlendMode;
@@ -24,8 +27,6 @@ import openfl._internal.renderer.opengl.GLRenderer;
 
 class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesCommand>
 {
-	private static var matrix4:Matrix4 = new Matrix4();
-	
 	/**
 	 * Default tile shader.
 	 */
@@ -43,7 +44,9 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	/**
 	 * Transformation matrix for this item on camera.
 	 */
-	public var matrix:Matrix;
+	public var matrix(null, set):Matrix;
+	
+	private var matrix4:Matrix4 = new Matrix4();
 	
 	/**
 	 * Color transform for this item.
@@ -64,7 +67,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		blendMode = null;
 		
 		data = null;
-		matrix = null;
+		matrix4 = null;
 		color = null;
 	}
 	
@@ -143,13 +146,6 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		// set transform matrix for all triangles in this item:
-		matrix4.identity();
-		matrix4[0] = matrix.a;
-		matrix4[1] = matrix.b;
-		matrix4[4] = matrix.c;
-		matrix4[5] = matrix.d;
-		matrix4[12] = matrix.tx;
-		matrix4[13] = matrix.ty;
 		GL.uniformMatrix4fv(shader.data.uModel.index, false, matrix4);
 		
 		renderSession.blendModeManager.setBlendMode(blendMode);
@@ -181,7 +177,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	{
 		super.reset();
 		data = null;
-		matrix = null;
+		matrix4.identity();
 		color = null;
 	}
 	
@@ -205,6 +201,22 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	{
 		return (data != null) ? data.numTriangles : 0;
 	}
+	
+	private function set_matrix(value:Matrix):Matrix
+	{
+		if (value != null)
+		{
+			matrix4.identity();
+			matrix4[0] = value.a;
+			matrix4[1] = value.b;
+			matrix4[4] = value.c;
+			matrix4[5] = value.d;
+			matrix4[12] = value.tx;
+			matrix4[13] = value.ty;
+		}
+		
+		return value;
+	}
 }
 
 #else
@@ -213,5 +225,15 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	public var data:TrianglesData;
 	public var matrix:Matrix;
 	public var color:ColorTransform;
+	
+	public function canAddTriangles(numTriangles:Int):Bool
+	{
+		return true;
+	}
+	
+	public function addTriangles(data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform):Void { }
+	
+	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void { }
+	
 }
 #end

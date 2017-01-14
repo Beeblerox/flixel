@@ -1,30 +1,31 @@
 package flixel.system.render.hardware.gl;
 
-#if FLX_RENDER_GL
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
-import flixel.graphics.shaders.tiles.FlxColored;
-import flixel.graphics.shaders.tiles.FlxTextured;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.system.render.common.FlxCameraView;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import openfl.display.BlendMode;
+import openfl.display.DisplayObject;
+import openfl.geom.ColorTransform;
+import openfl.geom.Matrix;
+import flixel.system.FlxAssets.FlxShader;
+
+#if FLX_RENDER_GL
+import flixel.graphics.shaders.tiles.FlxColored;
+import flixel.graphics.shaders.tiles.FlxTextured;
 import lime.graphics.GLRenderContext;
 import lime.math.Matrix4;
 import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLRenderer;
-import openfl.display.BlendMode;
-import openfl.display.DisplayObject;
 import openfl.display.Shader;
-import openfl.geom.ColorTransform;
-import openfl.geom.Matrix;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 import lime.utils.ArrayBuffer;
@@ -642,5 +643,8 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	{ 
 		super();
 	}
+	
+	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void { }
+	
 }
 #end
