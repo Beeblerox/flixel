@@ -50,22 +50,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	
 	private static var defaultColoredShader:FlxColored = new FlxColored();
 	
-	/**
-	 * Current texture being used by batch.
-	 */
-	
-	// TODO: use these 2 vars for less state switches on gpu...
-	private static var prevTexture:FlxGraphic;
-	
-	private static var prevShader:FlxGraphic;
-	
-	// TODO: use this method...
-	public static function resetState():Void
-	{
-		prevTexture = null;
-		prevShader = null;
-	}
-	
 	public var roundPixels:Bool = false;
 	
 	/**
@@ -121,7 +105,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	public function new(size:Int = 2000, textured:Bool = true) 
 	{
 		super();
-		type = FlxDrawItemType.TILES;
+		type = FlxDrawItemType.QUADS;
 		
 		this.size = size;
 		
@@ -413,8 +397,13 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		currentBlendMode = nextBlendMode = state.blend;
 		renderSession.blendModeManager.setBlendMode(currentBlendMode);
 		
+		var currentSmoothing:Bool;
+		var nextSmoothing:Bool;
+		currentSmoothing = nextSmoothing = state.smoothing;
+		
 		var blendSwap:Bool = false;
 		var textureSwap:Bool = false;
+		var smoothingSwap:Bool = false;
 		
 		for (i in 0...numQuads)
 		{
@@ -422,17 +411,20 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 			
 			nextTexture = state.texture;
 			nextBlendMode = state.blend;
+			nextSmoothing = state.smoothing;
 			
 			blendSwap = (currentBlendMode != nextBlendMode);
 			textureSwap = (currentTexture != nextTexture);
+			smoothingSwap = (currentSmoothing != nextSmoothing);
 			
-			if (textureSwap || blendSwap)
+			if (textureSwap || blendSwap || smoothingSwap)
 			{
-				renderBatch(currentTexture, batchSize, startIndex);
+				renderBatch(currentTexture, batchSize, startIndex, nextSmoothing);
 				
 				startIndex = i;
 				batchSize = 0;
 				currentTexture = nextTexture;
+				currentSmoothing = nextSmoothing;
 				
 				if (blendSwap)
 				{
@@ -444,7 +436,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 			batchSize++;
 		}
 		
-		renderBatch(currentTexture, batchSize, startIndex);
+		renderBatch(currentTexture, batchSize, startIndex, currentSmoothing);
 		
 		// then reset the batch!
 		numQuads = 0;
@@ -504,7 +496,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		}
 	}
 	
-	private function renderBatch(texture:FlxGraphic, size:Int, startIndex:Int):Void
+	private function renderBatch(texture:FlxGraphic, size:Int, startIndex:Int, smoothing:Bool = false):Void
 	{
 		if (size == 0)
 			return;
@@ -615,7 +607,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 class RenderState implements IFlxDestroyable
 {
 	public var blend:BlendMode;
-	public var smoothing:Bool; // TODO: change texture filtering if smoothing changes..
+	public var smoothing:Bool;
 	public var texture:FlxGraphic;
 	
 	public var startIndex:Int = 0;

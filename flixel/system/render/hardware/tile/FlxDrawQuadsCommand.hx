@@ -27,7 +27,7 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 		super();
 		
 		this.size = size;
-		type = FlxDrawItemType.TILES;
+		type = FlxDrawItemType.QUADS;
 	}
 	
 	override public function reset():Void

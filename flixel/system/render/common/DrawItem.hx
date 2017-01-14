@@ -26,6 +26,6 @@ typedef FlxDrawTrianglesCommand =	#if (openfl >= "4.0.0")
 
 enum FlxDrawItemType 
 {
-	TILES;
+	QUADS;
 	TRIANGLES;
 }

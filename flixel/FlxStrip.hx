@@ -1,6 +1,7 @@
 package flixel;
 
 import flixel.graphics.TrianglesData;
+import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.render.common.DrawItem.DrawData;
@@ -24,6 +25,9 @@ import flixel.util.FlxDestroyUtil;
  */
 class FlxStrip extends FlxSprite
 {
+	private static var tempBounds:FlxRect = new FlxRect();
+	private static var tempPoint:FlxPoint = new FlxPoint();
+	
 	/**
 	 * A Vector of Floats where each pair of numbers is treated as a coordinate location (an x, y pair).
 	 */
@@ -60,6 +64,7 @@ class FlxStrip extends FlxSprite
 	override public function destroy():Void 
 	{
 		data = FlxDestroyUtil.destroy(data);
+		bounds = FlxDestroyUtil.put(bounds);
 		
 		super.destroy();
 	}
@@ -83,38 +88,54 @@ class FlxStrip extends FlxSprite
 			}
 		}
 		
+		// update matrix
+		_matrix.identity();
+		_matrix.translate(-origin.x, -origin.y);
+		_matrix.scale(scale.x, scale.y);
+		
+		updateTrig();
+		
+		if (angle != 0)
+			_matrix.rotateWithTrig(_cosAngle, _sinAngle);
+		
+		_matrix.translate(origin.x, origin.y);
+		
+		// now calculate transformed bounds of sprite
+		var tx:Float = _matrix.transformX(bounds.x, bounds.y);
+		var ty:Float = _matrix.transformY(bounds.x, bounds.y);
+		tempBounds.set(tx, ty, 0, 0);
+		
+		tx = _matrix.transformX(bounds.right, bounds.y);
+		ty = _matrix.transformY(bounds.right, bounds.y);
+		tempPoint.set(tx, ty);
+		tempBounds.unionWithPoint(tempPoint);
+		
+		tx = _matrix.transformX(bounds.right, bounds.bottom);
+		ty = _matrix.transformY(bounds.right, bounds.bottom);
+		tempPoint.set(tx, ty);
+		tempBounds.unionWithPoint(tempPoint);
+		
+		tx = _matrix.transformX(bounds.x, bounds.bottom);
+		ty = _matrix.transformY(bounds.x, bounds.bottom);
+		tempPoint.set(tx, ty);
+		tempBounds.unionWithPoint(tempPoint);
+		
 		for (camera in cameras)
 		{
 			if (!camera.visible || !camera.exists)
-			{
 				continue;
-			}
 			
 			getScreenPosition(_point, camera);
+			tempBounds.offset(_point.x, _point.y);
 			
-			// TODO: not only translate bounds rectangle, 
-			// but also scale and rotate it for correct visibility check...
-			bounds.offset(_point.x, _point.y);
-			
-			if (camera.view.bounds.overlaps(bounds))
+			if (camera.view.bounds.overlaps(tempBounds))
 			{
-				_matrix.identity();
-				
-				_matrix.translate(-origin.x, -origin.y);
-				_matrix.scale(scale.x, scale.y);
-				
-				updateTrig();
-				
-				if (angle != 0)
-					_matrix.rotateWithTrig(_cosAngle, _sinAngle);
-				
-				_matrix.translate(origin.x, origin.y);
 				_matrix.translate(_point.x, _point.y);
-				
 				camera.drawTriangles(graphic, data, _matrix, colorTransform, blend, repeat, antialiasing);
+				_matrix.translate( -_point.x, -_point.y);
 			}
 			
-			bounds.offset( -_point.x, -_point.y);
+			tempBounds.offset( -_point.x, -_point.y);
 		}
 	}
 	

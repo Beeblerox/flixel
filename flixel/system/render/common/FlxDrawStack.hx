@@ -109,7 +109,7 @@ class FlxDrawStack implements IFlxDestroyable
 		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentCommand != null
-			&& _currentCommand.equals(FlxDrawItemType.TILES, graphic, colored, hasColorOffsets, blend, smooth, shader) 
+			&& _currentCommand.equals(FlxDrawItemType.QUADS, graphic, colored, hasColorOffsets, blend, smooth, shader) 
 			&& _lastTexturedQuads.canAddQuad)
 		{
 			return _lastTexturedQuads;
@@ -153,7 +153,7 @@ class FlxDrawStack implements IFlxDestroyable
 		var itemToReturn:FlxDrawQuadsCommand = null;
 		
 		if (_currentCommand != null
-			&& _currentCommand.equals(FlxDrawItemType.TILES, null, true, false, blend, false, shader) 
+			&& _currentCommand.equals(FlxDrawItemType.QUADS, null, true, false, blend, false, shader) 
 			&& _lastColoredQuads.canAddQuad)
 		{
 			return _lastColoredQuads;
@@ -338,10 +338,6 @@ class FlxDrawStack implements IFlxDestroyable
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		
 		var drawItem = getTexturedTilesCommand(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
-		
-		if (hasColorOffsets)
-			drawItem.setOffsets(transform);
-		
 		drawItem.addQuad(frame, _helperMatrix, transform, blend, smoothing);
 	}
 	

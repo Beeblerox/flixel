@@ -1,5 +1,7 @@
 package flixel.system.render.hardware.gl;
 
+import flixel.graphics.FlxGraphic;
+import flixel.system.FlxAssets.FlxShader;
 import flixel.system.render.common.FlxCameraView;
 import flixel.system.render.hardware.FlxHardwareView;
 import flixel.system.render.common.FlxDrawBaseItem;
@@ -16,9 +18,6 @@ import lime.utils.Int16Array; // UInt32Array;
  */
 class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 {
-	public static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 5;
-	public static inline var ELEMENTS_PER_NON_TEXTURED_VERTEX:Int = 3;
-	
 	public function new() 
 	{
 		super();
