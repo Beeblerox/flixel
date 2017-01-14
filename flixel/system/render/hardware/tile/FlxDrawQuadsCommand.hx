@@ -17,7 +17,8 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 	
 	public var drawData:Array<Float> = [];
 	public var position:Int = 0;
-	public var currentBatchSize(get, never):Int;
+	public var numQuads(get, never):Int;
+	public var elementsPerQuad(get, null):Int;
 	
 	public var canAddQuad(get, null):Bool;
 	
@@ -110,34 +111,34 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 	
 	private function get_canAddQuad():Bool
 	{
-		return ((currentBatchSize + 1) <= FlxCameraView.QUADS_PER_BATCH);
+		return ((numQuads + 1) <= FlxCameraView.QUADS_PER_BATCH);
 	}
 	
-	private function get_currentBatchSize():Int
+	private function get_numQuads():Int
 	{
-		return Std.int(position / elementsPerTile);
+		return Std.int(position / elementsPerQuad);
 	}
 	
-	override function get_elementsPerTile():Int 
+	private function get_elementsPerQuad():Int 
 	{
-		var elementsPerTile:Int = 8; // x, y, id, trans (4 elements) and alpha
+		var elementsPerQuad:Int = 8; // x, y, id, trans (4 elements) and alpha
 		if (colored)
-			elementsPerTile += 3; // r, g, b
+			elementsPerQuad += 3; // r, g, b
 		#if (!openfl_legacy && openfl >= "3.6.0")
 		if (hasColorOffsets)
-			elementsPerTile += 4; // r, g, b, a
+			elementsPerQuad += 4; // r, g, b, a
 		#end
 		
-		return elementsPerTile;
+		return elementsPerQuad;
 	}
 	
 	override private function get_numVertices():Int
 	{
-		return FlxCameraView.VERTICES_PER_QUAD * currentBatchSize; 
+		return FlxCameraView.VERTICES_PER_QUAD * numQuads; 
 	}
 	
 	override private function get_numTriangles():Int
 	{
-		return 2 * currentBatchSize;
+		return numQuads * FlxCameraView.TRIANGLES_PER_QUAD;
 	}
 }

@@ -96,7 +96,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	/**
 	 * Current number of quads in our batch.
 	 */
-	public var currentBatchSize(default, null):Int = 0;
+	public var numQuads(default, null):Int = 0;
 	
 	public var canAddQuad(get, null):Bool;
 	
@@ -200,13 +200,13 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	public function addColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool, ?shader:FlxShader):Void
 	{
 		// check texture..
-	//	if (currentBatchSize > size)
+	//	if (numQuads > size)
 	//	{
 	//		flush();
 	//		currentTexture = texture;
 	//	}
 		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
+		var i = numQuads * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_COLORED_VERTEX;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -263,11 +263,11 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		color.alphaFloat = alpha;
 		colors[i + 2] = colors[i + 5] = colors[i + 8] = colors[i + 11] = color;
 		
-		var state:RenderState = states[currentBatchSize];
+		var state:RenderState = states[numQuads];
 		
 		state.set(null, blend, false);
 		
-		currentBatchSize++;
+		numQuads++;
 	}
 	
 	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
@@ -279,7 +279,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	{
 		/*
 		// check texture..
-		if (currentBatchSize > size)
+		if (numQuads > size)
 		{
 			flush();
 			currentTexture = texture;
@@ -292,7 +292,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		var uvx2:Float = uv.width;
 		var uvy2:Float = uv.height;
 		
-		var i = currentBatchSize * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX;
+		var i = numQuads * Float32Array.BYTES_PER_ELEMENT * FlxDrawQuadsCommand.ELEMENTS_PER_TEXTURED_VERTEX;
 		
 		var w:Float = rect.width;
 		var h:Float = rect.height;
@@ -384,15 +384,15 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		
 		colors[i + 5] = colors[i + 11] = colors[i + 17] = colors[i + 23] = color;
 		
-		var state:RenderState = states[currentBatchSize];
+		var state:RenderState = states[numQuads];
 		state.set(texture, blend, smoothing);
 		
-		currentBatchSize++;
+		numQuads++;
 	}
 	
 	private function flush():Void
 	{
-		if (currentBatchSize == 0)
+		if (numQuads == 0)
 			return;
 		
 		var batchSize:Int = 0;
@@ -416,7 +416,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		var blendSwap:Bool = false;
 		var textureSwap:Bool = false;
 		
-		for (i in 0...currentBatchSize)
+		for (i in 0...numQuads)
 		{
 			state = states[i];
 			
@@ -447,7 +447,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		renderBatch(currentTexture, batchSize, startIndex);
 		
 		// then reset the batch!
-		currentBatchSize = 0;
+		numQuads = 0;
 	}
 	
 	private inline function getShader():FlxShader
@@ -493,13 +493,13 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		}
 		
 		// upload the verts to the buffer  
-		if (currentBatchSize > 0.5 * size)
+		if (numQuads > 0.5 * size)
 		{
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, positions);
 		}
 		else
 		{
-			var view = positions.subarray(0, currentBatchSize * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex);
+			var view = positions.subarray(0, numQuads * Float32Array.BYTES_PER_ELEMENT * elementsPerVertex);
 			GL.bufferSubData(GL.ARRAY_BUFFER, 0, view);
 		}
 	}
@@ -593,7 +593,17 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	
 	private function get_canAddQuad():Bool
 	{
-		return currentBatchSize < FlxCameraView.QUADS_PER_BATCH;
+		return numQuads < FlxCameraView.QUADS_PER_BATCH;
+	}
+	
+	override private function get_numVertices():Int
+	{
+		return numQuads * FlxCameraView.VERTICES_PER_QUAD;
+	}
+	
+	override private function get_numTriangles():Int
+	{
+		return numQuads * FlxCameraView.TRIANGLES_PER_QUAD;
 	}
 	
 	override private function get_elementsPerVertex():Int
@@ -632,7 +642,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 {
 	public static var BATCH_SIZE:Int;
 	
-	public var currentBatchSize(default, null):Int = 0;
+	public var numQuads(default, null):Int = 0;
 	
 	public var canAddQuad(default, null):Bool = false;
 	

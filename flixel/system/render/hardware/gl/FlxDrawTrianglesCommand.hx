@@ -190,6 +190,16 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		if (data != null)
 			data.setContext(gl);
 	}
+	
+	override private function get_numVertices():Int
+	{
+		return (data != null) ? data.numIndices : 0;
+	}
+	
+	override private function get_numTriangles():Int 
+	{
+		return (data != null) ? data.numTriangles : 0;
+	}
 }
 
 #else

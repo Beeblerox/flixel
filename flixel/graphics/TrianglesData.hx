@@ -12,8 +12,6 @@ import openfl.gl.GLBuffer;
 import openfl.utils.Float32Array;
 #end
 
-// TODO: fix this for flash target
-
 class TrianglesData implements IFlxDestroyable
 {
 	public static function getQuadData(width:Float = 100, height:Float = 100, color:FlxColor = FlxColor.WHITE):TrianglesData

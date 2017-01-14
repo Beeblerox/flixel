@@ -77,11 +77,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public var prevhader:FlxShader;
 	
-	public var redOffset:Float = 0.0;
-	public var greenOffset:Float = 0.0;
-	public var blueOffset:Float = 0.0;
-	public var alphaOffset:Float = 0.0;
-	
 	public var type:FlxDrawItemType;
 	
 	public var numVertices(get, never):Int;
@@ -90,9 +85,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public var elementsPerVertex(get, null):Int;
 	
-	public var elementsPerTile(get, null):Int;
-	
-	// TODO: use this var...
 	public var textured(get, null):Bool;
 	
 	public function new() {}
@@ -107,11 +99,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		shader = null;
 		nextTyped = null;
 		next = null;
-		
-		redOffset = 0.0;
-		greenOffset = 0.0;
-		blueOffset = 0.0;
-		alphaOffset = 0.0;
 	}
 	
 	public function destroy():Void
@@ -161,14 +148,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 		this.shader = shader;
 	}
 	
-	public inline function setOffsets(transform:ColorTransform):Void
-	{
-		redOffset = transform.redOffset / 255;
-		greenOffset = transform.greenOffset / 255;
-		blueOffset = transform.blueOffset / 255;
-		alphaOffset = transform.alphaOffset / 255;
-	}
-	
 	private function get_numVertices():Int
 	{
 		return 0;
@@ -180,11 +159,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	}
 	
 	private function get_elementsPerVertex():Int
-	{
-		return 0;
-	}
-	
-	private function get_elementsPerTile():Int
 	{
 		return 0;
 	}

@@ -24,8 +24,6 @@ import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
-// TODO: make it work with openfl 3.6.1 with "next" flag and without it!!!
-
 /**
  * ...
  * @author Zaphod
@@ -326,9 +324,6 @@ class FlxDrawStack implements IFlxDestroyable
 		var isColored = (transform != null && transform.hasRGBMultipliers());
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 		var drawItem = getTexturedTilesCommand(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
-		
-		if (hasColorOffsets)
-			drawItem.setOffsets(transform);
 		
 		drawItem.addQuad(frame, matrix, transform, blend, smoothing);
 	}

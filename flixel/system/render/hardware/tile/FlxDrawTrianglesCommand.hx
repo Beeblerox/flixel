@@ -118,8 +118,6 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 	
 	public function addTriangles(data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform):Void
 	{
-		// TODO: fix this...
-		
 		var drawVertices = this.vertices;
 		var verticesLength:Int = data.vertices.length;
 		var numberOfVertices:Int = Std.int(verticesLength / 2);
@@ -293,6 +291,16 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 		
 		vertexPos += 8;
 		indexPos += 6;
+	}
+	
+	override private function get_elementsPerVertex():Int 
+	{
+		return 2;
+	}
+	
+	override private function get_numVertices():Int 
+	{
+		return Std.int(vertexPos / elementsPerVertex);
 	}
 	
 	override private function get_numTriangles():Int
