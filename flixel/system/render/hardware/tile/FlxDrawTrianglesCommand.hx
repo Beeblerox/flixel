@@ -164,6 +164,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 			}
 		}
 		
+		#if openfl_legacy
 		if (colored)
 		{
 			var tr:Float = 1.0;
@@ -200,6 +201,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 				}
 			}
 		}
+		#end
 	}
 	
 	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void
@@ -259,6 +261,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 		indices[prevIndicesPos + 4] = prevNumberOfVertices + 3;
 		indices[prevIndicesPos + 5] = prevNumberOfVertices;
 		
+		#if openfl_legacy
 		if (colored)
 		{
 			var red = 1.0;
@@ -286,6 +289,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 			
 			colorPos += 4;
 		}
+		#end
 		
 		vertexPos += 8;
 		indexPos += 6;
