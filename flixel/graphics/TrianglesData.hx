@@ -55,6 +55,8 @@ class TrianglesData implements IFlxDestroyable
 	
 	public var numIndices(get, null):Int;
 	
+	public var numTriangles(get, null):Int;
+	
 	public var colored(get, null):Bool;
 	
 	public var dirty(default, set):Bool = true;
@@ -139,6 +141,11 @@ class TrianglesData implements IFlxDestroyable
 	private function get_numIndices():Int
 	{
 		return (indices != null) ? indices.length : 0;
+	}
+	
+	private function get_numTriangles():Int
+	{
+		return Std.int(numIndices / 3);
 	}
 	
 	private function get_colored():Bool

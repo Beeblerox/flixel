@@ -10,7 +10,7 @@ import openfl.gl.GLBuffer;
 import openfl.gl.GL;
 #end
 
-#if !openfl_legacy
+#if (!openfl_legacy)
 import openfl.display.Shader;
 #end
 

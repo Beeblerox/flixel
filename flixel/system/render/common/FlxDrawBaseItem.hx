@@ -14,10 +14,10 @@ import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 
-import openfl._internal.renderer.RenderSession;
-
 #if (openfl < "4.0.0")
 import openfl.display.Tilesheet;
+#else
+import openfl._internal.renderer.RenderSession;
 #end
 
 /**
@@ -126,10 +126,10 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public function render(view:FlxHardwareView):Void { }
 	
-	#if flash
-	public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void { }
-	#else
+	#if FLX_RENDER_GL
 	public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void { }
+	#else
+	public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void { }
 	#end
 	
 	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void { }

@@ -38,6 +38,8 @@ class FlxCameraView implements IFlxDestroyable
 	
 	public static inline var VERTICES_PER_QUAD:Int = 4;
 	
+	public static inline var TRIANGLES_PER_QUAD:Int = 2;
+	
 	public static inline var INDICES_PER_TRIANGLE:Int = 3;
 	
 	public static inline var INDICES_PER_QUAD:Int = 6;

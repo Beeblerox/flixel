@@ -24,7 +24,7 @@ import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
-// TODO: make it work with openfl 3.6.1 with "next" flag and without it...
+// TODO: make it work with openfl 3.6.1 with "next" flag and without it!!!
 
 /**
  * ...
@@ -249,46 +249,6 @@ class FlxDrawStack implements IFlxDestroyable
 		return getNewTrianglesCommand(graphic, smooth, colored, blend, shader);
 	}
 	
-	/*
-	@:noCompletion
-	public function getNewDrawTrianglesItem(graphic:FlxGraphic, smooth:Bool = false,
-		colored:Bool = false, ?blend:BlendMode, ?shader:FlxShader):FlxDrawTrianglesItem
-	{
-		var itemToReturn:FlxDrawTrianglesCommand = null;
-		
-		if (_storageTrianglesHead != null)
-		{
-			itemToReturn = _trianglesStorage;
-			var newHead:FlxDrawTrianglesCommand = _trianglesStorage.nextTyped;
-			itemToReturn.reset();
-			_storageTrianglesHead = newHead;
-		}
-		else
-		{
-			itemToReturn = new FlxDrawTrianglesCommand();
-		}
-		
-		itemToReturn.set(graphic, colored, false, blend, smooth, shader);
-		
-		itemToReturn.nextTyped = _headTriangles;
-		_headTriangles = itemToReturn;
-		
-		if (_firstCommand == null)
-		{
-			_firstCommand = itemToReturn;
-		}
-		
-		if (_currentCommand != null)
-		{
-			_currentCommand.next = itemToReturn;
-		}
-		
-		_currentCommand = itemToReturn;
-		
-		return itemToReturn;
-	}
-	*/
-	
 	public function fillRect(rect:FlxRect, color:FlxColor, alpha:Float = 1.0):Void
 	{
 		#if FLX_RENDER_GL
@@ -390,22 +350,31 @@ class FlxDrawStack implements IFlxDestroyable
 		drawItem.addQuad(frame, _helperMatrix, transform, blend, smoothing);
 	}
 	
-	// TODO: put back triangle batching for openfl less than 4.0...
-	
 	// TODO: add support for repeat (it's true by default)
+	
+	/*
+	@:enum abstract RepeatMode(Int) to Int {
+		var NONE 	= GL.CLAMP_TO_EDGE;
+		var REPEAT 	= GL.REPEAT;
+		var MIRROR 	= GL.MIRRORED_REPEAT;
+	}
+	*/
+	
 	public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		#if FLX_RENDER_GL
 		var isColored:Bool = data.colored;
-		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader);
+		
+		#if FLX_RENDER_GL
+		var drawItem = getNewTrianglesCommand(graphic, smoothing, isColored, blend, shader);
 		drawItem.data = data;
 		drawItem.matrix = matrix;
 		drawItem.color = transform;
 		#else
+		isColored = isColored || (transform != null && transform.hasRGBMultipliers());
 		
-		// TODO: fix this...
-		
+		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader, data.numTriangles);
+		drawItem.addTriangles(data, matrix, transform);
 		#end
 	}
 	
@@ -414,30 +383,21 @@ class FlxDrawStack implements IFlxDestroyable
 	{
 		var isColored = (transform != null && transform.hasRGBMultipliers());
 		var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
-	//	#if (openfl >= "4.0.0")
+		#if (openfl >= "4.0.0")
 		var drawItem = getTexturedTilesCommand(graphic, isColored, hasColorOffsets, blend, smoothing, shader);
-	//	#else
-	//	var drawItem = startTrianglesBatch(graphic, smoothing, isColored, blend, shader, FlxCameraView.VERTICES_PER_TILE, FlxCameraView.INDICES_PER_TILE);
-	//	#end
-		
-		if (hasColorOffsets)
-			drawItem.setOffsets(transform);
-		
-		drawItem.addUVQuad(graphic, rect, uv, matrix, transform);
+		#else
+		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, blend, shader, FlxCameraView.TRIANGLES_PER_QUAD);
+		#end
+		drawItem.addUVQuad(graphic, rect, uv, matrix, transform, blend, smoothing);
 	}
 	
 	public function drawColorQuad(rect:FlxRect, matrix:FlxMatrix, color:FlxColor, alpha:Float = 1.0, ?blend:BlendMode, ?smoothing:Bool = false, ?shader:FlxShader):Void
 	{
-		// TODO: fix this...
-		
-		/*
 		#if (openfl >= "4.0.0")
-		var drawItem = getTexturedTilesCommand(null, true, false, blend, smoothing, shader);
+		var drawItem = getColoredTilesCommand(blend, shader);
 		#else
-		var drawItem = getNewDrawTrianglesItem(null, smoothing, true, blend, shader);
+		var drawItem = getTrianglesCommand(null, smoothing, true, blend, shader, FlxCameraView.TRIANGLES_PER_QUAD);
 		#end
-		drawItem.addColorQuad(rect, matrix, color, alpha, blend, smoothing);
-		*/
-		
+		drawItem.addColorQuad(rect, matrix, color, alpha, blend, smoothing, shader);
 	}
 }
