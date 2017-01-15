@@ -22,6 +22,8 @@ import openfl.display.DisplayObject;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
 
+using flixel.util.FlxColorTransformUtil;
+
 // TODO: try to add general vertex and index arrays to minimize data upload operations (gl.bufferData() calls). Like it's done in GL implementation of Tilemap renderer...
 // TODO: multitexture batching...
 // TODO: sprite materials with multiple textures...
@@ -148,18 +150,22 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
 		
-		// TODO: don't colorTransform all the time...
-		var numPasses:Int = GLUtils.getObjectNumPasses(this) + 1; // 1 - means color transform
+		var numPasses:Int = GLUtils.getObjectNumPasses(this);
+		
+		var worldColor:ColorTransform = this.__worldColorTransform;
+		var useColorTransform = worldColor.hasAnyTransformation();
+		
+		if (useColorTransform)
+			numPasses += 1; 	// '+ 1' means color transform
+		
 		var needRenderHelper:Bool = (numPasses > 0);
 		var transform:Matrix = this.__worldTransform;
 		var uMatrix:Array<Float> = null;
 		
-		var worldColor:ColorTransform = this.__worldColorTransform;
-		
 		if (needRenderHelper)
 		{
-			renderHelper.capture();
 			renderHelper.colorTransform = worldColor;
+			renderHelper.capture();
 			uMatrix = renderHelper.getMatrix(transform, renderer, numPasses);
 		}
 		else
@@ -182,7 +188,6 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		{
 			_renderHelper = new GLRenderHelper(this, __width, __height, false, false);
 			_renderHelper.fullscreen = false;
-			_renderHelper.useColorTransform = true;
 		}
 		
 		return _renderHelper;

@@ -18,6 +18,8 @@ import openfl.gl.GLBuffer;
 import openfl.gl.GLTexture;
 import openfl.utils.Float32Array;
 
+using flixel.util.FlxColorTransformUtil;
+
 @:access(openfl.display.DisplayObject.__worldTransform)
 @:access(openfl.display.DisplayObject.__worldColorTransform)
 class GLRenderHelper implements IFlxDestroyable
@@ -43,7 +45,7 @@ class GLRenderHelper implements IFlxDestroyable
 	/**
 	 * 
 	 */
-	public var useColorTransform:Bool = false;
+	public var useColorTransform(default, null):Bool = false;
 	
 	/**
 	 * 
@@ -354,6 +356,8 @@ class GLRenderHelper implements IFlxDestroyable
 			colorOffsets[1] = value.greenOffset / 255;
 			colorOffsets[2] = value.blueOffset / 255;
 			colorOffsets[3] = value.alphaOffset / 255;
+			
+			useColorTransform = value.hasAnyTransformation();
 		}
 		else
 		{
@@ -366,6 +370,8 @@ class GLRenderHelper implements IFlxDestroyable
 			colorOffsets[1] = 0.0;
 			colorOffsets[2] = 0.0;
 			colorOffsets[3] = 0.0;
+			
+			useColorTransform = false;
 		}
 		
 		colorTransformShader.data.uColor.value = colorMultipliers;
