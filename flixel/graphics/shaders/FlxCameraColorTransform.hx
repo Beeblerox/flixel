@@ -1,8 +1,9 @@
 package flixel.graphics.shaders;
+
 import flixel.system.FlxAssets.FlxShader;
 
 // TODO: use it...
-class FlxCameraColorTransform extends FlxShader
+class FlxCameraColorTransform extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -32,7 +33,7 @@ class FlxCameraColorTransform extends FlxShader
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
 				
-				float alpha = color.a * vColor.a * uColor.a;
+				float alpha = color.a * uColor.a;
 				vec4 result = vec4(color.rgb * alpha, alpha) *  uColor;
 				
 				result = result + uColorOffset;
@@ -43,6 +44,5 @@ class FlxCameraColorTransform extends FlxShader
 	public function new() 
 	{
 		super(defaultVertexSource, defaultFragmentSource);
-	}
-	
+	}	
 }

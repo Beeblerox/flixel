@@ -37,7 +37,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	
 	public var blendMode:BlendMode;
 	
-	private var worldTransform:Matrix;
+	private var uniformMatrix:Matrix4;
 	
 	public var data:TrianglesData;
 	
@@ -61,7 +61,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 	
 	override public function destroy():Void
 	{
-		worldTransform = null;
+		uniformMatrix = null;
 		
 		shader = null;
 		blendMode = null;
@@ -71,9 +71,9 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		color = null;
 	}
 	
-	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
+	override public function renderGL(uniformMatrix:Matrix4, renderSession:RenderSession):Void
 	{
-		this.worldTransform = worldTransform;
+		this.uniformMatrix = uniformMatrix;
 		
 		// init! init!
 		setContext(renderSession.gl);
@@ -139,11 +139,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		GL.uniform4f(shader.data.uColor.index, red, green, blue, alpha);
 		GL.uniform4f(shader.data.uColorOffset.index, redOffset, greenOffset, blueOffset, alphaOffset);
 		
-		var renderer:GLRenderer = cast renderSession.renderer;
-		var worldMatrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLUtils.arrayToMatrix(worldMatrix);
-		
-		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
+		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uniformMatrix);
 		
 		// set transform matrix for all triangles in this item:
 		GL.uniformMatrix4fv(shader.data.uModel.index, false, matrix4);

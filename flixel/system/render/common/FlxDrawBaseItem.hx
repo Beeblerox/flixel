@@ -18,6 +18,7 @@ import openfl.geom.Matrix;
 import openfl.display.Tilesheet;
 #else
 import openfl._internal.renderer.RenderSession;
+import lime.math.Matrix4;
 #end
 
 /**
@@ -114,9 +115,9 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	public function render(view:FlxHardwareView):Void { }
 	
 	#if FLX_RENDER_GL
-	public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void { }
+	public function renderGL(uniformMatrix:Matrix4, renderSession:RenderSession):Void { }
 	#else
-	public function renderGL(worldTransform:Matrix, renderSession:Dynamic):Void { }
+	public function renderGL(uniformMatrix:Dynamic, renderSession:Dynamic):Void { }
 	#end
 	
 	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void { }

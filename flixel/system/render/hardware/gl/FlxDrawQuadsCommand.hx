@@ -97,7 +97,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	
 	private var renderSession:RenderSession;
 	
-	private var worldTransform:Matrix;
+	private var uniformMatrix:Matrix4;
 	
 	private var gl:GLRenderContext;
 	
@@ -165,11 +165,11 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		}
 	}
 	
-	override public function renderGL(worldTransform:Matrix, renderSession:RenderSession):Void
+	override public function renderGL(uniformMatrix:Matrix4, renderSession:RenderSession):Void
 	{
 		setContext(renderSession.gl);
 		
-		this.worldTransform = worldTransform;
+		this.uniformMatrix = uniformMatrix;
 		this.renderSession = renderSession;
 		this.renderer = cast renderSession.renderer;
 		
@@ -520,9 +520,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
 		// end of todo...
 		
-		var matrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLUtils.arrayToMatrix(matrix);
-		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
+		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uniformMatrix);
 		
 		// now draw those suckas!
 		GL.drawElements(GL.TRIANGLES, size * FlxCameraView.INDICES_PER_QUAD, GL.UNSIGNED_SHORT, startIndex * FlxCameraView.INDICES_PER_QUAD * BYTES_PER_INDEX);
@@ -540,7 +538,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		dirty = true;
 		renderSession = null;
 		renderer = null;
-		worldTransform = null;
+		uniformMatrix = null;
 	}
 	
 	override public function destroy():Void
@@ -559,7 +557,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		
 		renderSession = null;
 		renderer = null;
-		worldTransform = null;
+		uniformMatrix = null;
 		gl = null;
 		
 		shader = null;

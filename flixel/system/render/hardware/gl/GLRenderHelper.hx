@@ -154,6 +154,7 @@ class GLRenderHelper implements IFlxDestroyable
 		}
 		
 		var objectTransfrom:Matrix = object.__worldTransform;
+		
 		_objMatrixCopy.copyFrom(objectTransfrom);
 		_fullscreen = fullscreen;
 		

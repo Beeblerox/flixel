@@ -42,5 +42,4 @@ class FlxColored extends FlxShader
 		__glSourceDirty = true;
 		#end
 	}
-
 }

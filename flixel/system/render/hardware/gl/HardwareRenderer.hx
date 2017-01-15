@@ -10,6 +10,7 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import openfl.geom.ColorTransform;
 
 #if FLX_RENDER_GL
+import lime.math.Matrix4;
 import lime.graphics.GLRenderContext;
 import lime.utils.Float32Array;
 import openfl._internal.renderer.RenderSession;
@@ -70,11 +71,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		this.height = height;
 		
 		if (_renderHelper != null)
-		{
-			// TODO: fix this...
-			_renderHelper.resize(Math.ceil(__width * FlxG.camera.initialZoom), Math.ceil(__height * FlxG.camera.initialZoom));
-			//_renderHelper.resize(__width, __height);
-		}
+			_renderHelper.resize(__width, __height);
 	}
 	
 	public function clear():Void
@@ -160,6 +157,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		if (needRenderHelper)
 		{
+		//	renderHelper.capture(true);
 			renderHelper.capture(false);
 			uMatrix = renderHelper.getMatrix(transform, renderer, numPasses);
 		}
@@ -167,6 +165,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		{
 			uMatrix = renderer.getMatrix(transform);
 		}
+		
+		var uniformMatrix:Matrix4 = GLUtils.arrayToMatrix(uMatrix);
 		
 		// TODO: use this var later...
 		var worldColor:ColorTransform = this.__worldColorTransform;
@@ -177,7 +177,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		uColor[3] = this.__worldAlpha;
 		
 		for (i in 0...stateNum)
-			states[i].renderGL(transform, renderSession);
+			states[i].renderGL(uniformMatrix, renderSession);
 		
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
@@ -187,8 +187,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 	{
 		if (_renderHelper == null)
 		{
-			// TODO: fix this...
-			_renderHelper = new GLRenderHelper(this, Math.ceil(__width * FlxG.camera.initialZoom), Math.ceil(__height * FlxG.camera.initialZoom), true, false);
+			_renderHelper = new GLRenderHelper(this, __width, __height, false, false);
 		}
 		
 		return _renderHelper;
