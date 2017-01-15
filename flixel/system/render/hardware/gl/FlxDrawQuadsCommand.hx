@@ -24,7 +24,6 @@ import lime.math.Matrix4;
 import lime.utils.UInt16Array;
 import lime.utils.UInt32Array;
 import openfl._internal.renderer.RenderSession;
-import openfl._internal.renderer.opengl.GLRenderer;
 import openfl.display.Shader;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
@@ -101,8 +100,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 	
 	private var gl:GLRenderContext;
 	
-	private var renderer:GLRenderer;
-	
 	public function new(size:Int = 2000, textured:Bool = true) 
 	{
 		super();
@@ -171,7 +168,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		
 		this.uniformMatrix = uniformMatrix;
 		this.renderSession = renderSession;
-		this.renderer = cast renderSession.renderer;
 		
 		start();
 		stop();
@@ -537,7 +533,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		
 		dirty = true;
 		renderSession = null;
-		renderer = null;
 		uniformMatrix = null;
 	}
 	
@@ -556,7 +551,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		states = FlxDestroyUtil.destroyArray(states);
 		
 		renderSession = null;
-		renderer = null;
 		uniformMatrix = null;
 		gl = null;
 		
