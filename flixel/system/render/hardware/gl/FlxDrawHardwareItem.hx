@@ -1,16 +1,11 @@
 package flixel.system.render.hardware.gl;
 
-import flixel.graphics.FlxGraphic;
-import flixel.system.FlxAssets.FlxShader;
-import flixel.system.render.common.FlxCameraView;
 import flixel.system.render.hardware.FlxHardwareView;
 import flixel.system.render.common.FlxDrawBaseItem;
-import openfl.gl.GL;
 
-#if (openfl >= "4.0.0")
-import lime.graphics.opengl.GLBuffer;
-import lime.utils.Float32Array;
-import lime.utils.Int16Array; // UInt32Array;
+#if FLX_RENDER_GL
+import openfl._internal.renderer.RenderSession;
+import lime.math.Matrix4;
 
 /**
  * ...
@@ -25,23 +20,19 @@ class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
 	
 	override public function render(view:FlxHardwareView):Void 
 	{
-		#if !flash
 		view.drawItem(this);
-		#end
 	}
 	
-	private function setTextureSmoothing(smooth:Bool):Void
+	public function renderGL(uniformMatrix:Matrix4, renderSession:RenderSession):Void { }
+}
+#else
+class FlxDrawHardwareItem<T> extends FlxDrawBaseItem<T>
+{
+	public function new() 
 	{
-		if (smooth) 
-		{		
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
-		}
-		else
-		{		
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
-		}
+		super();
 	}
+	
+	public function renderGL(uniformMatrix:Dynamic, renderSession:Dynamic):Void { }
 }
 #end

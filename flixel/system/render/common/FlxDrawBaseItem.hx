@@ -114,12 +114,6 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public function render(view:FlxHardwareView):Void { }
 	
-	#if FLX_RENDER_GL
-	public function renderGL(uniformMatrix:Matrix4, renderSession:RenderSession):Void { }
-	#else
-	public function renderGL(uniformMatrix:Dynamic, renderSession:Dynamic):Void { }
-	#end
-	
 	public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void { }
 	
 	public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void { }

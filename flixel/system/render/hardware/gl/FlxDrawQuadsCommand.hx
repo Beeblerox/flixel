@@ -503,7 +503,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 			GL.activeTexture(GL.TEXTURE0);
 			GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 			
-			setTextureSmoothing(smoothing);
+			GLUtils.setTextureSmoothing(smoothing);
 		}
 		else
 		{

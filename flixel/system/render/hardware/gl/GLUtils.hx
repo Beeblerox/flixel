@@ -54,6 +54,20 @@ class GLUtils
 		return passes;
 	}
 	
+	public static function setTextureSmoothing(smoothing:Bool):Void
+	{
+		if (smoothing) 
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);	
+		}
+		else
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
+		}
+	}
+	
 	public static function destroyBuffer(buffer:GLBuffer):GLBuffer
 	{
 		if (buffer != null)

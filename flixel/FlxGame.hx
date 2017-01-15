@@ -925,16 +925,12 @@ class FlxGame extends Sprite
 		var needRenderHelper:Bool = (GLUtils.getObjectNumPasses(this) > 0);
 		
 		if (needRenderHelper)
-		{
 			renderHelper.capture(true);
-		}
 		
 		super.__renderGL(renderSession);
 		
 		if (needRenderHelper)
-		{
 			renderHelper.render(renderSession);
-		}
 	}
 	#end
 	
