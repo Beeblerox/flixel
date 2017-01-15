@@ -36,8 +36,6 @@ import openfl.geom.Rectangle;
 class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 {
 	#if FLX_RENDER_GL
-	private static var uColor:Array<Float> = [];
-
 	private var states:Array<FlxDrawHardwareItem<Dynamic>>;
 	private var stateNum:Int;
 	
@@ -150,15 +148,18 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
 		
-		var numPasses:Int = GLUtils.getObjectNumPasses(this);
+		// TODO: don't colorTransform all the time...
+		var numPasses:Int = GLUtils.getObjectNumPasses(this) + 1; // 1 - means color transform
 		var needRenderHelper:Bool = (numPasses > 0);
 		var transform:Matrix = this.__worldTransform;
 		var uMatrix:Array<Float> = null;
 		
+		var worldColor:ColorTransform = this.__worldColorTransform;
+		
 		if (needRenderHelper)
 		{
-		//	renderHelper.capture(true);
-			renderHelper.capture(false);
+			renderHelper.capture();
+			renderHelper.colorTransform = worldColor;
 			uMatrix = renderHelper.getMatrix(transform, renderer, numPasses);
 		}
 		else
@@ -167,14 +168,6 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		}
 		
 		var uniformMatrix:Matrix4 = GLUtils.arrayToMatrix(uMatrix);
-		
-		// TODO: use this var later...
-		var worldColor:ColorTransform = this.__worldColorTransform;
-		
-		uColor[0] = worldColor.redMultiplier;
-		uColor[1] = worldColor.greenMultiplier;
-		uColor[2] = worldColor.blueMultiplier;
-		uColor[3] = this.__worldAlpha;
 		
 		for (i in 0...stateNum)
 			states[i].renderGL(uniformMatrix, renderSession);
@@ -188,6 +181,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		if (_renderHelper == null)
 		{
 			_renderHelper = new GLRenderHelper(this, __width, __height, false, false);
+			_renderHelper.fullscreen = false;
+			_renderHelper.useColorTransform = true;
 		}
 		
 		return _renderHelper;

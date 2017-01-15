@@ -1,5 +1,6 @@
 package flixel.system.render.hardware.gl;
 
+import flixel.graphics.shaders.FlxCameraColorTransform;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -10,6 +11,7 @@ import openfl._internal.renderer.opengl.GLRenderer;
 import openfl.display.DisplayObject;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
+import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
@@ -17,12 +19,41 @@ import openfl.gl.GLTexture;
 import openfl.utils.Float32Array;
 
 @:access(openfl.display.DisplayObject.__worldTransform)
+@:access(openfl.display.DisplayObject.__worldColorTransform)
 class GLRenderHelper implements IFlxDestroyable
 {
+	// TODO: document these variables...
+	/**
+	 * 
+	 */
+	private static var colorTransformShader:FlxCameraColorTransform = new FlxCameraColorTransform();
+	
+	/**
+	 * 
+	 */
+	private static var colorMultipliers:Array<Float> = [];
+	private static var colorOffsets:Array<Float> = [];
+	
 	public var width(default, null):Int;
 	public var height(default, null):Int;
 	public var smoothing(default, null):Bool;
 	public var powerOfTwo(default, null):Bool;
+	
+	// TODO: document these variables...
+	/**
+	 * 
+	 */
+	public var useColorTransform:Bool = false;
+	
+	/**
+	 * 
+	 */
+	public var colorTransform(null, set):ColorTransform;
+	
+	/**
+	 * Whether we need to capture whole screen or only specified area
+	 */
+	public var fullscreen:Bool;
 	
 	/**
 	 * Object which this render helper belongs to.
@@ -38,10 +69,6 @@ class GLRenderHelper implements IFlxDestroyable
 	 * Temp copy of object's transform matrix. Stored while passes are being rendered.
 	 */
 	private var _objMatrixCopy:Matrix = new Matrix();
-	/**
-	 * Whether we need to capture whole screen or only specified area
-	 */
-	private var _fullscreen:Bool;
 	
 	/**
 	 * Helper variable for applying transformations while rendering passes
@@ -98,6 +125,8 @@ class GLRenderHelper implements IFlxDestroyable
 		
 		var uv = _texture.renderTexture.uvData;
 		
+		// TODO: implement tinting vertices of the camera...
+		
 		var vertices:Float32Array = new Float32Array([
 			-1.0, 	-1.0, 	uv.x, 		uv.y,
 			1.0, 	-1.0, 	uv.width, 	uv.y,
@@ -129,15 +158,14 @@ class GLRenderHelper implements IFlxDestroyable
 	
 	private function get_numPasses():Int
 	{
-		return GLUtils.getObjectNumPasses(object);
+		var num:Int = GLUtils.getObjectNumPasses(object);
+		return (useColorTransform) ? num + 1 : num; 
 	}
 	
 	/**
 	 * Start capturing graphics to internal buffer
-	 * 
-	 * @param	fullscreen			Do we need to grab whole screen area?
 	 */
-	public function capture(fullscreen:Bool = false):Void
+	public function capture():Void
 	{
 		if (numPasses <= 0)
 			return;
@@ -156,7 +184,6 @@ class GLRenderHelper implements IFlxDestroyable
 		var objectTransfrom:Matrix = object.__worldTransform;
 		
 		_objMatrixCopy.copyFrom(objectTransfrom);
-		_fullscreen = fullscreen;
 		
 		if (!fullscreen)
 		{
@@ -189,23 +216,31 @@ class GLRenderHelper implements IFlxDestroyable
 		var objectTransfrom:Matrix = object.__worldTransform;
 		
 		var filters:Array<BitmapFilter> = object.filters;
-		var numFilters:Int = filters.length;
 		var shader:FlxShader = null;
 		
 		var filterIndex:Int = 0;
 		var i:Int = 0;
 		
-		while (i < passes && filterIndex < numFilters)
+		while (i < passes)
 		{
 			shader = null;
 			
-			if (Std.is(filters[filterIndex], ShaderFilter))
+			// first pass is always color transform
+			if (i == 0 && useColorTransform)
 			{
-				shader = (cast filters[filterIndex]).shader;
+				shader = colorTransformShader;
 				i++;
 			}
-			
-			filterIndex++;
+			else
+			{
+				if (Std.is(filters[filterIndex], ShaderFilter))
+				{
+					shader = (cast filters[filterIndex]).shader;
+					i++;
+				}
+				
+				filterIndex++;
+			}
 			
 			if (shader == null)
 				continue;
@@ -241,7 +276,7 @@ class GLRenderHelper implements IFlxDestroyable
 			
 			_renderMatrix.translate(0.5 * width, 0.5 * height);
 			
-			if (i == passes && !_fullscreen)
+			if (i == passes && !fullscreen)
 			{
 				// restore object matrix before last render pass
 				_renderMatrix.concat(_objMatrixCopy);
@@ -254,8 +289,9 @@ class GLRenderHelper implements IFlxDestroyable
 			renderSession.shaderManager.setShader(shader);
 			gl.bindTexture(GL.TEXTURE_2D, textureToUse);
 			
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, _texture.smoothing ? gl.LINEAR : gl.NEAREST);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, _texture.smoothing ? gl.LINEAR : gl.NEAREST);
+			GLUtils.setTextureSmoothing(_texture.smoothing);
+			
+			// TODO: texture wrapping util method...
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			
@@ -303,5 +339,38 @@ class GLRenderHelper implements IFlxDestroyable
 		mat[13] = transform.ty;
 		mat.append(_projection);
 		return GLUtils.matrixToArray(mat);
+	}
+	
+	private function set_colorTransform(value:ColorTransform):ColorTransform
+	{
+		if (value != null)
+		{
+			colorMultipliers[0] = value.redMultiplier;
+			colorMultipliers[1] = value.greenMultiplier;
+			colorMultipliers[2] = value.blueMultiplier;
+			colorMultipliers[3] = value.alphaMultiplier;
+			
+			colorOffsets[0] = value.redOffset / 255;
+			colorOffsets[1] = value.greenOffset / 255;
+			colorOffsets[2] = value.blueOffset / 255;
+			colorOffsets[3] = value.alphaOffset / 255;
+		}
+		else
+		{
+			colorMultipliers[0] = 1.0;
+			colorMultipliers[1] = 1.0;
+			colorMultipliers[2] = 1.0;
+			colorMultipliers[3] = 1.0;
+			
+			colorOffsets[0] = 0.0;
+			colorOffsets[1] = 0.0;
+			colorOffsets[2] = 0.0;
+			colorOffsets[3] = 0.0;
+		}
+		
+		colorTransformShader.data.uColor.value = colorMultipliers;
+		colorTransformShader.data.uColorOffset.value = colorOffsets;
+		
+		return value;
 	}
 }

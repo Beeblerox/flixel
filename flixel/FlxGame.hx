@@ -915,6 +915,7 @@ class FlxGame extends Sprite
 		if (_renderHelper == null)
 		{
 			_renderHelper = new GLRenderHelper(this, Std.int(FlxG.stage.stageWidth), Std.int(FlxG.stage.stageHeight), true, false);
+			_renderHelper.fullscreen = true;
 		}
 		
 		return _renderHelper;
@@ -925,7 +926,7 @@ class FlxGame extends Sprite
 		var needRenderHelper:Bool = (GLUtils.getObjectNumPasses(this) > 0);
 		
 		if (needRenderHelper)
-			renderHelper.capture(true);
+			renderHelper.capture();
 		
 		super.__renderGL(renderSession);
 		
