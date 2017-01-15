@@ -153,7 +153,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		var gl:GLRenderContext = renderSession.gl;
 		var renderer:GLRenderer = cast renderSession.renderer;
 		
-		var numPasses:Int = GLRenderHelper.getObjectNumPasses(this);
+		var numPasses:Int = GLUtils.getObjectNumPasses(this);
 		var needRenderHelper:Bool = (numPasses > 0);
 		var transform:Matrix = this.__worldTransform;
 		var uMatrix:Array<Float> = null;

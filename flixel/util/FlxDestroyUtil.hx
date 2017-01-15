@@ -4,15 +4,6 @@ import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flixel.util.FlxPool.IFlxPooled;
-import openfl.gl.GLBuffer;
-
-#if FLX_RENDER_GL
-import openfl.gl.GL;
-#end
-
-#if (!openfl_legacy)
-import openfl.display.Shader;
-#end
 
 class FlxDestroyUtil
 {
@@ -122,42 +113,7 @@ class FlxDestroyUtil
 			parent.removeChild(child);
 		}
 		return null;
-	}
-	
-	#if !openfl_legacy
-	public static function destroyShader(shader:Shader):Shader
-	{
-		#if FLX_RENDER_GL
-		if (shader != null)
-		{
-			if (shader.glProgram != null)
-			{
-				GL.deleteProgram(shader.glProgram);
-			//	shader.glProgram = null;
-			}
-			
-			shader.data = null;
-			shader.byteCode = null;
-			shader.glVertexSource = null;
-			shader.glFragmentSource = null;
-		//	gl = null;
-		}
-		#end
-		
-		return null;
-	}
-	#end
-	
-	#if FLX_RENDER_GL
-	public static function destroyBuffer(buffer:GLBuffer):GLBuffer
-	{
-		if (buffer != null)
-			GL.deleteBuffer(buffer);
-		
-		return null;
-	}
-	#end
-	
+	}	
 #end
 }
 

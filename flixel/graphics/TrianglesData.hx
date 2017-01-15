@@ -10,6 +10,7 @@ import lime.utils.UInt32Array;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 import openfl.utils.Float32Array;
+import flixel.system.render.hardware.gl.GLUtils;
 #end
 
 class TrianglesData implements IFlxDestroyable
@@ -99,10 +100,10 @@ class TrianglesData implements IFlxDestroyable
 		colorsArray = null;
 		indicesArray = null;
 		
-		verticesBuffer = FlxDestroyUtil.destroyBuffer(verticesBuffer);
-		uvsBuffer = FlxDestroyUtil.destroyBuffer(uvsBuffer);
-		colorsBuffer = FlxDestroyUtil.destroyBuffer(colorsBuffer);
-		indicesBuffer = FlxDestroyUtil.destroyBuffer(indicesBuffer);
+		verticesBuffer = GLUtils.destroyBuffer(verticesBuffer);
+		uvsBuffer = GLUtils.destroyBuffer(uvsBuffer);
+		colorsBuffer = GLUtils.destroyBuffer(colorsBuffer);
+		indicesBuffer = GLUtils.destroyBuffer(indicesBuffer);
 		#end
 	}
 	

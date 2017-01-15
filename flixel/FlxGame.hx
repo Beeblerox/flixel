@@ -34,6 +34,7 @@ import flixel.system.ui.FlxFocusLostScreen;
 #if FLX_RENDER_GL
 import openfl._internal.renderer.RenderSession;
 import flixel.system.render.hardware.gl.GLRenderHelper;
+import flixel.system.render.hardware.gl.GLUtils;
 #end
 
 /**
@@ -921,7 +922,7 @@ class FlxGame extends Sprite
 	
 	override public function __renderGL(renderSession:RenderSession):Void
 	{
-		var needRenderHelper:Bool = (GLRenderHelper.getObjectNumPasses(this) > 0);
+		var needRenderHelper:Bool = (GLUtils.getObjectNumPasses(this) > 0);
 		
 		if (needRenderHelper)
 		{

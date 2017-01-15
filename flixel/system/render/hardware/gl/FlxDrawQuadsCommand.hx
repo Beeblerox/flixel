@@ -521,7 +521,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		// end of todo...
 		
 		var matrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(matrix);
+		var uMatrix:Matrix4 = GLUtils.arrayToMatrix(matrix);
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		
 		// now draw those suckas!
@@ -552,17 +552,8 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
 		positions = null;
 		colors = null;
 		
-		if (vertexBuffer != null)
-		{
-			GL.deleteBuffer(vertexBuffer);
-			vertexBuffer = null;
-		}
-		
-		if (indexBuffer != null)
-		{
-			GL.deleteBuffer(indexBuffer);
-			indexBuffer = null;
-		}
+		vertexBuffer = GLUtils.destroyBuffer(vertexBuffer);
+		indexBuffer = GLUtils.destroyBuffer(indexBuffer);
 		
 		states = FlxDestroyUtil.destroyArray(states);
 		

@@ -141,7 +141,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 		
 		var renderer:GLRenderer = cast renderSession.renderer;
 		var worldMatrix = renderer.getMatrix(worldTransform);
-		var uMatrix:Matrix4 = GLRenderHelper.arrayToMatrix(worldMatrix);
+		var uMatrix:Matrix4 = GLUtils.arrayToMatrix(worldMatrix);
 		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uMatrix);
 		

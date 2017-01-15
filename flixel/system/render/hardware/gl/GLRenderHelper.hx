@@ -19,56 +19,6 @@ import openfl.utils.Float32Array;
 @:access(openfl.display.DisplayObject.__worldTransform)
 class GLRenderHelper implements IFlxDestroyable
 {
-	/**
-	 * Helper variables for less object instantiation
-	 */
-	private static var _uMatrix:Array<Float> = [];
-	private static var _helperMatrix:Matrix4 = new Matrix4();
-	
-	public static inline function matrixToArray(matrix:Matrix4):Array<Float>
-	{
-		for (i in 0...16)	
-		{
-			_uMatrix[i] = matrix[i];
-		}
-		
-		return _uMatrix;
-	}
-	
-	public static inline function arrayToMatrix(array:Array<Float>):Matrix4
-	{
-		for (i in 0...16)	
-		{
-			_helperMatrix[i] = array[i];
-		}
-		
-		return _helperMatrix;
-	}
-	
-	/**
-	 * Checks how many render passes specified object has.
-	 * 
-	 * @param	object	display object to check
-	 * @return	Number of render passes for specified object
-	 */
-	public static function getObjectNumPasses(object:DisplayObject):Int
-	{
-		if (object == null || object.filters == null)
-			return 0;
-		
-		var passes:Int = 0;
-		
-		for (filter in object.filters)
-		{
-			if (Std.is(filter, ShaderFilter))
-			{
-				passes++;
-			}
-		}
-		
-		return passes;
-	}
-	
 	public var width(default, null):Int;
 	public var height(default, null):Int;
 	public var smoothing(default, null):Bool;
@@ -144,8 +94,7 @@ class GLRenderHelper implements IFlxDestroyable
 	
 	private function createBuffer():Void
 	{
-		if (_buffer != null)
-			GL.deleteBuffer(_buffer);
+		_buffer = GLUtils.destroyBuffer(_buffer);
 		
 		var uv = _texture.renderTexture.uvData;
 		
@@ -180,7 +129,7 @@ class GLRenderHelper implements IFlxDestroyable
 	
 	private function get_numPasses():Int
 	{
-		return getObjectNumPasses(object);
+		return GLUtils.getObjectNumPasses(object);
 	}
 	
 	/**
@@ -339,24 +288,19 @@ class GLRenderHelper implements IFlxDestroyable
 	public function getMatrix(transform:Matrix, renderer:GLRenderer, passesLeft:Int = 0):Array<Float> 
 	{
 		if (passesLeft == 0)
-		{
 			return renderer.getMatrix(transform);
-		}
 		else if (passesLeft < 0)
-		{
 			return null;
-		}
 		
-		_helperMatrix.identity();
-		_helperMatrix[0] = transform.a;
-		_helperMatrix[1] = transform.b;
-		_helperMatrix[4] = transform.c;
-		_helperMatrix[5] = transform.d;
-		_helperMatrix[12] = transform.tx;
-		_helperMatrix[13] = transform.ty;
-		_helperMatrix.append(_projection);
-		
-		return matrixToArray(_helperMatrix);
+		var mat = GLUtils._matrix4;
+		mat.identity();
+		mat[0] = transform.a;
+		mat[1] = transform.b;
+		mat[4] = transform.c;
+		mat[5] = transform.d;
+		mat[12] = transform.tx;
+		mat[13] = transform.ty;
+		mat.append(_projection);
+		return GLUtils.matrixToArray(mat);
 	}
-	
 }
