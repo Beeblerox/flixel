@@ -88,6 +88,8 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public var textured(get, null):Bool;
 	
+	// TODO: add `repeat` var...
+	
 	public function new() {}
 	
 	public function reset():Void
