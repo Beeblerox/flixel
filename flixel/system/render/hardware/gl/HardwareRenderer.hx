@@ -152,19 +152,12 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		
 		var numPasses:Int = GLUtils.getObjectNumPasses(this);
 		
-		var worldColor:ColorTransform = this.__worldColorTransform;
-		var useColorTransform = worldColor.hasAnyTransformation();
-		
-		if (useColorTransform)
-			numPasses += 1; 	// '+ 1' means color transform
-		
 		var needRenderHelper:Bool = (numPasses > 0);
 		var transform:Matrix = this.__worldTransform;
 		var uMatrix:Array<Float> = null;
 		
 		if (needRenderHelper)
 		{
-			renderHelper.colorTransform = worldColor;
 			renderHelper.capture();
 			uMatrix = renderHelper.getMatrix(transform, renderer, numPasses);
 		}

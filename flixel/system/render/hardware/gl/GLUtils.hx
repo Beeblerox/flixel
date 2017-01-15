@@ -1,5 +1,7 @@
 package flixel.system.render.hardware.gl;
+import flixel.util.FlxColorTransformUtil;
 import openfl.display.Shader;
+import openfl.geom.ColorTransform;
 import openfl.gl.GL;
 import openfl.gl.GLBuffer;
 
@@ -8,6 +10,7 @@ import lime.math.Matrix4;
 import openfl.display.DisplayObject;
 import openfl.filters.ShaderFilter;
 
+@:access(openfl.display.DisplayObject.__worldColorTransform)
 class GLUtils 
 {
 	/**
@@ -40,10 +43,17 @@ class GLUtils
 	 */
 	public static function getObjectNumPasses(object:DisplayObject):Int
 	{
-		if (object == null || object.filters == null)
+		if (object == null)
 			return 0;
 		
 		var passes:Int = 0;
+		
+		var worldColor:ColorTransform = object.__worldColorTransform;
+		if (FlxColorTransformUtil.hasAnyTransformation(worldColor))
+			passes += 1;
+			
+		if (object.filters == null)
+			return passes;
 		
 		for (filter in object.filters)
 		{
@@ -65,6 +75,21 @@ class GLUtils
 		{		
 			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
 			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);	
+		}
+	}
+	
+	// TODO: use this method...
+	public static function setTextureWrapping(repeat:Bool = true):Void
+	{
+		if (repeat) 
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
+		}
+		else
+		{		
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
 		}
 	}
 	

@@ -24,14 +24,14 @@ using flixel.util.FlxColorTransformUtil;
 @:access(openfl.display.DisplayObject.__worldColorTransform)
 class GLRenderHelper implements IFlxDestroyable
 {
-	// TODO: document these variables...
 	/**
-	 * 
+	 * Default color transform shader for handling display object's ColorTransform (if it has any)
 	 */
 	private static var colorTransformShader:FlxCameraColorTransform = new FlxCameraColorTransform();
 	
 	/**
-	 * 
+	 * Helper variables for temp storage of color transformation coefficients, 
+	 * which will be used by colorTransformShader
 	 */
 	private static var colorMultipliers:Array<Float> = [];
 	private static var colorOffsets:Array<Float> = [];
@@ -41,16 +41,17 @@ class GLRenderHelper implements IFlxDestroyable
 	public var smoothing(default, null):Bool;
 	public var powerOfTwo(default, null):Bool;
 	
-	// TODO: document these variables...
 	/**
-	 * 
+	 * Tells us whether object has any color transformations.
+	 * If yes, then will be used additional shader pass for handling it.
+	 * Color transformation pass will be the first one.
 	 */
-	public var useColorTransform(default, null):Bool = false;
+	public var useColorTransform(get, null):Bool = false;
 	
 	/**
-	 * 
+	 * Just returns object's ColorTransform value
 	 */
-	public var colorTransform(null, set):ColorTransform;
+	public var colorTransform(get, null):ColorTransform;
 	
 	/**
 	 * Whether we need to capture whole screen or only specified area
@@ -160,8 +161,7 @@ class GLRenderHelper implements IFlxDestroyable
 	
 	private function get_numPasses():Int
 	{
-		var num:Int = GLUtils.getObjectNumPasses(object);
-		return (useColorTransform) ? num + 1 : num; 
+		return GLUtils.getObjectNumPasses(object);
 	}
 	
 	/**
@@ -231,6 +231,7 @@ class GLRenderHelper implements IFlxDestroyable
 			if (i == 0 && useColorTransform)
 			{
 				shader = colorTransformShader;
+				updateColorTransform();
 				i++;
 			}
 			else
@@ -292,10 +293,7 @@ class GLRenderHelper implements IFlxDestroyable
 			gl.bindTexture(GL.TEXTURE_2D, textureToUse);
 			
 			GLUtils.setTextureSmoothing(_texture.smoothing);
-			
-			// TODO: texture wrapping util method...
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			GLUtils.setTextureWrapping(false);
 			
 			gl.bindBuffer(GL.ARRAY_BUFFER, _buffer);
 			
@@ -343,21 +341,35 @@ class GLRenderHelper implements IFlxDestroyable
 		return GLUtils.matrixToArray(mat);
 	}
 	
-	private function set_colorTransform(value:ColorTransform):ColorTransform
+	private function get_colorTransform():ColorTransform
 	{
-		if (value != null)
+		return (object != null) ? object.__worldColorTransform : null;
+	}
+	
+	private function get_useColorTransform():Bool
+	{
+		var color:ColorTransform = colorTransform;
+		if (color != null)
+			return  color.hasAnyTransformation();
+		
+		return false;
+	}
+	
+	private function updateColorTransform():Void
+	{
+		var color:ColorTransform = colorTransform;
+		
+		if (color != null)
 		{
-			colorMultipliers[0] = value.redMultiplier;
-			colorMultipliers[1] = value.greenMultiplier;
-			colorMultipliers[2] = value.blueMultiplier;
-			colorMultipliers[3] = value.alphaMultiplier;
+			colorMultipliers[0] = color.redMultiplier;
+			colorMultipliers[1] = color.greenMultiplier;
+			colorMultipliers[2] = color.blueMultiplier;
+			colorMultipliers[3] = color.alphaMultiplier;
 			
-			colorOffsets[0] = value.redOffset / 255;
-			colorOffsets[1] = value.greenOffset / 255;
-			colorOffsets[2] = value.blueOffset / 255;
-			colorOffsets[3] = value.alphaOffset / 255;
-			
-			useColorTransform = value.hasAnyTransformation();
+			colorOffsets[0] = color.redOffset / 255;
+			colorOffsets[1] = color.greenOffset / 255;
+			colorOffsets[2] = color.blueOffset / 255;
+			colorOffsets[3] = color.alphaOffset / 255;
 		}
 		else
 		{
@@ -370,13 +382,9 @@ class GLRenderHelper implements IFlxDestroyable
 			colorOffsets[1] = 0.0;
 			colorOffsets[2] = 0.0;
 			colorOffsets[3] = 0.0;
-			
-			useColorTransform = false;
 		}
 		
 		colorTransformShader.data.uColor.value = colorMultipliers;
 		colorTransformShader.data.uColorOffset.value = colorOffsets;
-		
-		return value;
 	}
 }
