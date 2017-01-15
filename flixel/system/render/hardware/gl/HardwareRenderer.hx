@@ -176,21 +176,8 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		uColor[2] = worldColor.blueMultiplier;
 		uColor[3] = this.__worldAlpha;
 		
-		var shader:FlxShader = null;
-		var nextShader:FlxShader = null;
-		var blend:BlendMode = null;
-		var texture:FlxGraphic = null;
-		
-		var i:Int = 0;
-		
-		while (i < stateNum)
-		{
+		for (i in 0...stateNum)
 			states[i].renderGL(transform, renderSession);
-			i++;
-		}
-		
-	//	renderSession.shaderManager.setShader(null);
-	//	renderSession.blendModeManager.setBlendMode(null);
 		
 		if (needRenderHelper)
 			renderHelper.render(renderSession);
