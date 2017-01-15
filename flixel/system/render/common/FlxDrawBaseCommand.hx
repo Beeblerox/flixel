@@ -76,7 +76,7 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 	public var blending:BlendMode = null;
 	public var shader:FlxShader;
 	
-	public var prevhader:FlxShader;
+	// TODO: add `repeat` var...
 	
 	public var type:FlxDrawItemType;
 	
@@ -87,8 +87,6 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 	public var elementsPerVertex(get, null):Int;
 	
 	public var textured(get, null):Bool;
-	
-	// TODO: add `repeat` var...
 	
 	public function new() {}
 	
