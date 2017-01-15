@@ -38,7 +38,7 @@ using flixel.util.FlxColorTransformUtil;
 class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 {
 	#if FLX_RENDER_GL
-	private var states:Array<FlxDrawHardwareItem<Dynamic>>;
+	private var states:Array<FlxDrawHardwareCommand<Dynamic>>;
 	private var stateNum:Int;
 	
 	private var __height:Int;
@@ -79,7 +79,7 @@ class HardwareRenderer extends DisplayObject implements IFlxDestroyable
 		stateNum = 0;
 	}
 
-	public function drawItem(item:FlxDrawHardwareItem<Dynamic>):Void
+	public function drawItem(item:FlxDrawHardwareCommand<Dynamic>):Void
 	{
 		states[stateNum++] = item;
 	}

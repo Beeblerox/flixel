@@ -25,7 +25,7 @@ import lime.graphics.GLRenderContext;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLRenderer;
 
-class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesCommand>
+class FlxDrawTrianglesCommand extends FlxDrawHardwareCommand<FlxDrawTrianglesCommand>
 {
 	/**
 	 * Default tile shader.
@@ -216,7 +216,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesComman
 }
 
 #else
-class FlxDrawTrianglesCommand extends FlxDrawHardwareItem<FlxDrawTrianglesCommand>
+class FlxDrawTrianglesCommand extends FlxDrawHardwareCommand<FlxDrawTrianglesCommand>
 {
 	public var data:TrianglesData;
 	public var matrix:Matrix;

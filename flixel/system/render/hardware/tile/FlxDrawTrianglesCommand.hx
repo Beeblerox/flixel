@@ -10,7 +10,7 @@ import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.render.common.FlxCameraView;
-import flixel.system.render.common.FlxDrawBaseItem;
+import flixel.system.render.common.FlxDrawBaseCommand;
 import flixel.system.render.hardware.FlxHardwareView;
 import flixel.util.FlxColor;
 import openfl.display.BlendMode;
@@ -22,7 +22,7 @@ import openfl.geom.ColorTransform;
  * ...
  * @author Zaphod
  */
-class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
+class FlxDrawTrianglesCommand extends FlxDrawBaseCommand<FlxDrawTrianglesCommand>
 {
 	private static var point:FlxPoint = FlxPoint.get();
 	private static var rect:FlxRect = FlxRect.get();
@@ -65,7 +65,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseItem<FlxDrawTrianglesCommand>
 			#if !openfl_legacy
 			view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
 			#else
-			view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE, (colored) ? colors : null, FlxDrawBaseItem.blendToInt(blending));
+			view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE, (colored) ? colors : null, FlxDrawBaseCommand.blendToInt(blending));
 			#end
 		}
 		

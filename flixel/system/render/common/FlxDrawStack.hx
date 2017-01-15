@@ -33,12 +33,12 @@ class FlxDrawStack implements IFlxDestroyable
 	/**
 	 * Currently used draw stack item
 	 */
-	private var _currentCommand:FlxDrawBaseItem<Dynamic>;
+	private var _currentCommand:FlxDrawBaseCommand<Dynamic>;
 	
 	/**
 	 * Pointer to head of stack with draw items
 	 */
-	private var _firstCommand:FlxDrawBaseItem<Dynamic>;
+	private var _firstCommand:FlxDrawBaseCommand<Dynamic>;
 	/**
 	 * Last draw tiles item
 	 */
@@ -91,9 +91,9 @@ class FlxDrawStack implements IFlxDestroyable
 		destroyDrawItemsChain(_trianglesStorage);
 	}
 	
-	private function destroyDrawItemsChain(item:FlxDrawBaseItem<Dynamic>):Void
+	private function destroyDrawItemsChain(item:FlxDrawBaseCommand<Dynamic>):Void
 	{
-		var next:FlxDrawBaseItem<Dynamic>;
+		var next:FlxDrawBaseCommand<Dynamic>;
 		while (item != null)
 		{
 			next = item.next;
@@ -310,7 +310,7 @@ class FlxDrawStack implements IFlxDestroyable
 	
 	public function render():Void
 	{
-		var currItem:FlxDrawBaseItem<Dynamic> = _firstCommand;
+		var currItem:FlxDrawBaseCommand<Dynamic> = _firstCommand;
 		while (currItem != null)
 		{
 			currItem.render(view);

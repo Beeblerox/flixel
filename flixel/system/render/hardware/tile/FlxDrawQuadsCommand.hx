@@ -5,13 +5,13 @@ import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
 import flixel.system.render.common.FlxCameraView;
-import flixel.system.render.common.FlxDrawBaseItem;
+import flixel.system.render.common.FlxDrawBaseCommand;
 import flixel.system.render.hardware.FlxHardwareView;
 import flash.display.BlendMode;
 import openfl.display.Tilesheet;
 import flash.geom.ColorTransform;
 
-class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
+class FlxDrawQuadsCommand extends FlxDrawBaseCommand<FlxDrawQuadsCommand>
 {
 	public var size(default, null):Int = 2000;
 	
@@ -99,7 +99,7 @@ class FlxDrawQuadsCommand extends FlxDrawBaseItem<FlxDrawQuadsCommand>
 			flags |= Tilesheet.TILE_TRANS_COLOR;
 		#end
 		
-		flags |= FlxDrawBaseItem.blendToInt(blending);
+		flags |= FlxDrawBaseCommand.blendToInt(blending);
 		
 		view.canvas.graphics.drawTiles(graphics.tilesheet, drawData,
 			(view.smoothing || smoothing), flags,

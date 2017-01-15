@@ -25,7 +25,7 @@ import lime.math.Matrix4;
  * ...
  * @author Zaphod
  */
-class FlxDrawBaseItem<T> implements IFlxDestroyable
+class FlxDrawBaseCommand<T> implements IFlxDestroyable
 {
 	#if (openfl < "4.0.0")
 	public static function blendToInt(blend:BlendMode):Int
@@ -67,7 +67,7 @@ class FlxDrawBaseItem<T> implements IFlxDestroyable
 	
 	public var nextTyped:T;
 	
-	public var next:FlxDrawBaseItem<T>;
+	public var next:FlxDrawBaseCommand<T>;
 	
 	public var graphics:FlxGraphic;
 	public var smoothing:Bool = false;

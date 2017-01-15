@@ -21,7 +21,7 @@ import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
 #if FLX_RENDER_GL
-import flixel.system.render.hardware.gl.FlxDrawHardwareItem;
+import flixel.system.render.hardware.gl.FlxDrawHardwareCommand;
 import flixel.system.render.hardware.gl.HardwareRenderer;
 #end
 
@@ -312,7 +312,7 @@ class FlxHardwareView extends FlxCameraView
 	}
 	
 	#if FLX_RENDER_GL
-	public function drawItem(item:FlxDrawHardwareItem<Dynamic>):Void
+	public function drawItem(item:FlxDrawHardwareCommand<Dynamic>):Void
 	{
 		canvas.drawItem(item);
 	}

@@ -35,7 +35,7 @@ import openfl.utils.Float32Array;
  * ...
  * @author Zaphod
  */
-class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
+class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 {
 	private static inline var ELEMENTS_PER_TEXTURED_VERTEX:Int = 6;
 	
@@ -614,7 +614,7 @@ class RenderState implements IFlxDestroyable
 }
 
 #else
-class FlxDrawQuadsCommand extends FlxDrawHardwareItem<FlxDrawQuadsCommand>
+class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 {
 	public static var BATCH_SIZE:Int;
 	
