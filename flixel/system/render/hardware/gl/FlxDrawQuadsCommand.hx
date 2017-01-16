@@ -505,6 +505,8 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 			
 			GLUtils.setTextureSmoothing(smoothing);
 			GLUtils.setTextureWrapping(repeat);
+			
+			GL.uniform2f(shader.data.uTextureSize.index, texture.width, texture.height);
 		}
 		else
 		{

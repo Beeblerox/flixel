@@ -12,6 +12,7 @@ class FlxTextured extends FlxShader
 			
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
+			uniform vec2 uTextureSize;
 			
 			void main(void) 
 			{

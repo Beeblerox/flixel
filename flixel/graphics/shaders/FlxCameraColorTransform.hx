@@ -13,6 +13,7 @@ class FlxCameraColorTransform extends FlxBaseShader
 			varying vec2 vTexCoord;
 			
 			uniform mat4 uMatrix;
+			uniform vec2 uTextureSize;
 			
 			void main(void) 
 			{

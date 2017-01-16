@@ -295,6 +295,8 @@ class GLRenderHelper implements IFlxDestroyable
 			GLUtils.setTextureSmoothing(_texture.smoothing);
 			GLUtils.setTextureWrapping(false);
 			
+			GL.uniform2f(shader.data.uTextureSize.index, _texture.width, _texture.height);
+			
 			gl.bindBuffer(GL.ARRAY_BUFFER, _buffer);
 			
 			gl.vertexAttribPointer(shader.data.aPosition.index, 2, gl.FLOAT, false, 16, 0);

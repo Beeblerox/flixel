@@ -106,6 +106,8 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareCommand<FlxDrawTrianglesCom
 			
 			GLUtils.setTextureSmoothing(smoothing);
 			GLUtils.setTextureWrapping(repeat);
+			
+			GL.uniform2f(shader.data.uTextureSize.index, graphics.width, graphics.height);
 		}
 		else
 		{
