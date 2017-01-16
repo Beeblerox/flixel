@@ -309,8 +309,6 @@ class FlxCamera extends FlxBasic
 			view.copyPixels(frame, pixels, sourceRect, destPoint, transform, blend, smoothing, shader);
 	}
 	
-	// TODO: bring back colors array parameter???
-	// TODO: remove repeat parameter, since it's always on...
 	public inline function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = true, smoothing:Bool = false, ?shader:FlxShader):Void 
 	{
