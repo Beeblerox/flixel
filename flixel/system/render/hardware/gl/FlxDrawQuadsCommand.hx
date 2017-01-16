@@ -504,6 +504,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 			GL.bindTexture(GL.TEXTURE_2D, texture.bitmap.getTexture(gl));
 			
 			GLUtils.setTextureSmoothing(smoothing);
+			GLUtils.setTextureWrapping(repeat);
 		}
 		else
 		{
@@ -558,7 +559,7 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 	}
 	
 	override public function equals(type:FlxDrawItemType, graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
-		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Bool
+		?blend:BlendMode, smooth:Bool = false, repeat:Bool = true, ?shader:FlxShader):Bool
 	{
 		var hasGraphic:Bool = (graphic != null);
 		var bothHasGraphic:Bool = (hasGraphic == textured);

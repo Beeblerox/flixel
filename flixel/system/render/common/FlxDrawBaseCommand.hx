@@ -75,8 +75,7 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 	public var hasColorOffsets:Bool = false;
 	public var blending:BlendMode = null;
 	public var shader:FlxShader;
-	
-	// TODO: add `repeat` var...
+	public var repeat:Bool = true;
 	
 	public var type:FlxDrawItemType;
 	
@@ -96,6 +95,7 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 		smoothing = false;
 		hasColorOffsets = false;
 		colored = false;
+		repeat = true;
 		blending = null;
 		shader = null;
 		nextTyped = null;
@@ -119,7 +119,7 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 	public function addUVQuad(texture:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool):Void { }
 	
 	public function equals(type:FlxDrawItemType, graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
-		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Bool
+		?blend:BlendMode, smooth:Bool = false, repeat:Bool = true, ?shader:FlxShader):Bool
 	{
 		if (hasColorOffsets)	return false;
 		
@@ -129,17 +129,19 @@ class FlxDrawBaseCommand<T> implements IFlxDestroyable
 			&& this.hasColorOffsets == hasColorOffsets
 			&& this.blending == blend
 			&& this.smoothing == smooth
+			&& this.repeat == repeat
 			&& this.shader == shader);
 	}
 	
 	public /*inline*/ function set(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false,
-		?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader):Void
+		?blend:BlendMode, smooth:Bool = false, repeat:Bool = true, ?shader:FlxShader):Void
 	{
 		this.graphics = graphic;
 		this.colored = colored;
 		this.hasColorOffsets = hasColorOffsets;
 		this.blending = blend;
 		this.smoothing = smooth;
+		this.repeat = repeat;
 		this.shader = shader;
 	}
 	

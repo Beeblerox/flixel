@@ -105,6 +105,7 @@ class FlxDrawTrianglesCommand extends FlxDrawHardwareCommand<FlxDrawTrianglesCom
 			GL.bindTexture(GL.TEXTURE_2D, graphics.bitmap.getTexture(renderSession.gl));
 			
 			GLUtils.setTextureSmoothing(smoothing);
+			GLUtils.setTextureWrapping(repeat);
 		}
 		else
 		{

@@ -61,7 +61,7 @@ class FlxDrawTrianglesCommand extends FlxDrawBaseCommand<FlxDrawTrianglesCommand
 		}
 		else
 		{
-			view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (view.smoothing || smoothing));
+			view.canvas.graphics.beginBitmapFill(graphics.bitmap, null, repeat, (view.smoothing || smoothing));
 			#if !openfl_legacy
 			view.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
 			#else

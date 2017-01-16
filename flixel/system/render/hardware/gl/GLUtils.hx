@@ -78,7 +78,6 @@ class GLUtils
 		}
 	}
 	
-	// TODO: use this method...
 	public static function setTextureWrapping(repeat:Bool = true):Void
 	{
 		if (repeat) 
