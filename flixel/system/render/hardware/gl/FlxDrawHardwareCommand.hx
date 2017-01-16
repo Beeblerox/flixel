@@ -11,7 +11,6 @@ import lime.math.Matrix4;
  * ...
  * @author Zaphod
  */
-// TODO: rename to FlxDrawHardwareCommand...
 class FlxDrawHardwareCommand<T> extends FlxDrawBaseCommand<T>
 {
 	public function new() 

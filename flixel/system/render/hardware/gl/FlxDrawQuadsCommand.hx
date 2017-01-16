@@ -512,11 +512,6 @@ class FlxDrawQuadsCommand extends FlxDrawHardwareCommand<FlxDrawQuadsCommand>
 			GL.bindTexture(GL.TEXTURE_2D, null);
 		}
 		
-		// TODO: move this uniform setting code into default camera color transform filter...
-	//	GL.uniform4f(shader.data.uColor.index, 1.0, 1.0, 1.0, 1.0);
-	//	GL.uniform4f(shader.data.uColorOffset.index, uColorOffset[0], uColorOffset[1], uColorOffset[2], uColorOffset[3]);
-		// end of todo...
-		
 		GL.uniformMatrix4fv(shader.data.uMatrix.index, false, uniformMatrix);
 		
 		// now draw those suckas!
