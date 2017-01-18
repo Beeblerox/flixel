@@ -1,9 +1,11 @@
 package flixel.graphics.shaders.triangles;
 
-import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxBaseShader;
 
-// TODO: check this later...
-class FlxTextured extends FlxShader
+/**
+ * Default shader used for rendering textured triangles with applied color transform of the FlxStrip.
+ */
+class FlxTextured extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -13,6 +15,8 @@ class FlxTextured extends FlxShader
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
 			uniform vec2 uTextureSize;
+			
+			varying vec2 vTexCoord;
 			
 			void main(void) 
 			{
@@ -31,21 +35,21 @@ class FlxTextured extends FlxShader
 			void main(void) 
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
-				float alpha = color.a * uColor.a;
-				// OpenFl uses textures in bgra format, so we should convert color...
-				vec4 result = vec4(color.rgb * alpha, alpha) * uColor.bgra + uColorOffset.bgra;
-				gl_FragColor = clamp(result, 0.0, 1.0);
+				
+				vec4 unmultiply = vec4(color.rgb / color.a, color.a);
+				vec4 result = unmultiply * uColor;
+				result = result + uColorOffset;
+				result = clamp(result, 0.0, 1.0);
+				result = vec4(result.rgb * result.a, result.a * color.a);
+				gl_FragColor = result;
 			}";
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		super();
+		vertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		fragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
-		#if FLX_RENDER_GL
-		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
-		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		__glSourceDirty = true;
-		#end
+		super(vertexSource, fragmentSource);
 	}
 
 }
