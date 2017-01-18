@@ -1,9 +1,10 @@
 package flixel.graphics.shaders.tiles;
+import flixel.graphics.shaders.FlxBaseShader;
 
-import flixel.graphics.shaders.FlxShader;
-
-// TODO: check it...
-class FlxTextured extends FlxShader
+/**
+ * Default shader used by batcher for rendering textured quads.
+ */
+class FlxTextured extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -40,23 +41,20 @@ class FlxTextured extends FlxShader
 			{
 				vec4 color = texture2D(uImage0, vTexCoord);
 				
-				float alpha = color.a * vColor.a;
-				vec4 result = vec4(color.rgb * alpha, alpha) * vColor;
+				vec4 unmultiply = vec4(color.rgb / color.a, color.a);
+				vec4 result = unmultiply * vColor;
 				result = result + vColorOffset;
 				result = clamp(result, 0.0, 1.0);
+				result = vec4(result.rgb * result.a, result.a * color.a);
 				
 				gl_FragColor = result;
 			}";
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		super();
+		vertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		fragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
-		#if FLX_RENDER_GL
-		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
-		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		
-		__glSourceDirty = true;
-		#end
+		super(vertexSource, fragmentSource);
 	}
 }

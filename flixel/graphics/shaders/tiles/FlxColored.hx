@@ -1,12 +1,12 @@
 package flixel.graphics.shaders.tiles;
 
+import flixel.graphics.shaders.FlxBaseShader;
 import flixel.graphics.shaders.FlxShader;
 
 /**
- * ...
- * @author Yanrishatum
+ * Default shader used by batcher for rendering quads without textures.
  */
-class FlxColored extends FlxShader
+class FlxColored extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -36,14 +36,10 @@ class FlxColored extends FlxShader
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		super();
+		vertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		fragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
-		#if FLX_RENDER_GL
-		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
-		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		
-		__glSourceDirty = true;
-		#end
+		super(vertexSource, fragmentSource);
 	}
 
 }

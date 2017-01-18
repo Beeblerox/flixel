@@ -1,6 +1,9 @@
 package flixel.graphics.shaders;
 
-// TODO: check it...
+/**
+ * Shader user for applying camera color transform (it there is any).
+ * It can be used as a basis for other camera effect shaders.
+ */
 class FlxCameraColorTransform extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
@@ -40,8 +43,11 @@ class FlxCameraColorTransform extends FlxBaseShader
 				gl_FragColor = result;
 			}";
 	
-	public function new() 
+	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		super(defaultVertexSource, defaultFragmentSource);
+		vertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		fragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
+		
+		super(vertexSource, fragmentSource);
 	}	
 }
