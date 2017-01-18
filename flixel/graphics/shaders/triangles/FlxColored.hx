@@ -2,7 +2,6 @@ package flixel.graphics.shaders.triangles;
 
 import flixel.graphics.shaders.FlxBaseShader;
 
-// TODO: check this later...
 /**
  * Default shader used for rendering triangles with colored vertices (each vertice could have inidividual color)
  */
@@ -23,7 +22,7 @@ class FlxColored extends FlxBaseShader
 			
 			void main(void) 
 			{
-				vec4 col = aColor.bgra * uColor.bgra + uColorOffset.bgra;
+				vec4 col = aColor.bgra * uColor + uColorOffset;
 				col = clamp(col, 0.0, 1.0);
 				vColor = vec4(col.rgb * col.a, col.a);
 				
