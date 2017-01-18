@@ -159,9 +159,22 @@ class FlxBlitView extends FlxCameraView
 	override public function drawTriangles(graphic:FlxGraphic, data:TrianglesData, ?matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, 
 		repeat:Bool = false, smoothing:Bool = false, ?shader:FlxShader):Void 
 	{
+		if (graphic == null && transform == null)
+			return;
+		
 		trianglesSprite.graphics.clear();
-		trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, repeat, smoothing);
-		trianglesSprite.graphics.drawTriangles(data.vertices, data.indices, data.uvs);
+		
+		if (graphic != null)
+		{
+			trianglesSprite.graphics.beginBitmapFill(graphic.bitmap, null, repeat, smoothing);
+			trianglesSprite.graphics.drawTriangles(data.vertices, data.indices, data.uvs);
+		}
+		else
+		{
+			trianglesSprite.graphics.beginFill(0xffffff, 1.0);
+			trianglesSprite.graphics.drawTriangles(data.vertices, data.indices);
+		}
+		
 		trianglesSprite.graphics.endFill();
 		buffer.draw(trianglesSprite, matrix, transform, blend);
 		

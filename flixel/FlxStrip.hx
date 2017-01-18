@@ -71,7 +71,7 @@ class FlxStrip extends FlxSprite
 	
 	override public function draw():Void 
 	{
-		if (alpha == 0 || graphic == null || vertices == null)
+		if (alpha == 0 || /*graphic == null ||*/ vertices == null)
 			return;
 		
 		if (dirty && vertices.length >= 6)
