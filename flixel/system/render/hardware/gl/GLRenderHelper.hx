@@ -1,7 +1,7 @@
 package flixel.system.render.hardware.gl;
 
 import flixel.graphics.shaders.FlxCameraColorTransform;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import lime.graphics.GLRenderContext;

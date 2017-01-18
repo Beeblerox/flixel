@@ -1,6 +1,6 @@
 package flixel.graphics.shaders.tiles;
 
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 
 /**
  * ...

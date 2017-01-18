@@ -4,7 +4,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.TrianglesData;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 import flixel.system.render.common.DrawItem.FlxDrawItemType;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;

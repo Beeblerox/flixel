@@ -1,6 +1,6 @@
 package flixel.graphics.shaders;
 
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 
 class FlxBaseShader extends FlxShader
 {

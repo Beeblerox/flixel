@@ -1,6 +1,6 @@
 package flixel.graphics.shaders.triangles;
 
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 
 // TODO: check this later...
 class FlxTextured extends FlxShader

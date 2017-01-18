@@ -14,7 +14,7 @@ import openfl.display.BlendMode;
 import openfl.display.DisplayObject;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.shaders.FlxShader;
 
 #if FLX_RENDER_GL
 import flixel.graphics.shaders.tiles.FlxColored;

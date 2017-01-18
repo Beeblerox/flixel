@@ -1,7 +1,5 @@
 package flixel.graphics.shaders;
 
-import flixel.system.FlxAssets.FlxShader;
-
 // TODO: check it...
 class FlxCameraColorTransform extends FlxBaseShader
 {
