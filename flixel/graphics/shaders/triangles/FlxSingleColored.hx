@@ -1,9 +1,12 @@
 package flixel.graphics.shaders.triangles;
 
-import flixel.graphics.shaders.FlxShader;
+import flixel.graphics.shaders.FlxBaseShader;
 
-// TODO: check this later...
-class FlxSingleColored extends FlxShader
+/**
+ * Default shader for rendering triangles without textures and without vertex colors
+ * (each vertex color is defined only by color transform of the FlxStrip).
+ */
+class FlxSingleColored extends FlxBaseShader
 {
 	public static inline var defaultVertexSource:String = 
 			"
@@ -12,31 +15,34 @@ class FlxSingleColored extends FlxShader
 			uniform mat4 uMatrix;
 			uniform mat4 uModel;
 			
+			uniform vec4 uColor;
+			uniform vec4 uColorOffset;
+			
+			varying vec4 vColor;
+			
 			void main(void) 
 			{
+				vec4 col = uColor + uColorOffset;
+				vColor = vec4(col.rgb * col.a, col.a);
+				
 				gl_Position = uMatrix * uModel * aPosition;
 			}";
 			
 	public static inline var defaultFragmentSource:String = 
 			"
-			uniform vec4 uColor;
-			uniform vec4 uColorOffset;
+			varying vec4 vColor;
 			
 			void main(void) 
 			{
-				vec4 result = uColor + uColorOffset;
-				gl_FragColor = clamp(result, 0.0, 1.0);
+				gl_FragColor = vColor;
 			}";
 	
 	public function new(?vertexSource:String, ?fragmentSource:String) 
 	{
-		super();
+		vertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
+		fragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
 		
-		#if FLX_RENDER_GL
-		__glVertexSource = (vertexSource == null) ? defaultVertexSource : vertexSource;
-		__glFragmentSource = (fragmentSource == null) ? defaultFragmentSource : fragmentSource;
-		__glSourceDirty = true;
-		#end
+		super(vertexSource, fragmentSource);
 	}
 
 }
