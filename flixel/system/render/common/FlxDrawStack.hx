@@ -356,6 +356,7 @@ class FlxDrawStack implements IFlxDestroyable
 		
 		var drawItem = getTrianglesCommand(graphic, smoothing, isColored, repeat, blend, shader, data.numTriangles);
 		drawItem.addTriangles(data, matrix, transform);
+		data.dirty = false;
 		#end
 	}
 	

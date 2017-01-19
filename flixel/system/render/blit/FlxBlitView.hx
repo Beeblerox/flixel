@@ -179,6 +179,7 @@ class FlxBlitView extends FlxCameraView
 		buffer.draw(trianglesSprite, matrix, transform, blend);
 		
 		drawDebugTriangles(data.vertices, data.indices, matrix);
+		data.dirty = false;
 	}
 	
 	override public function drawUVQuad(graphic:FlxGraphic, rect:FlxRect, uv:FlxRect, matrix:FlxMatrix,

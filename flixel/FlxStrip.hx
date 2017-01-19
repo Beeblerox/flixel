@@ -74,8 +74,9 @@ class FlxStrip extends FlxSprite
 		if (alpha == 0 || /*graphic == null ||*/ vertices == null)
 			return;
 		
-		if (dirty && vertices.length >= 6)
+		if ((dirty || data.verticesDirty) && vertices.length >= 6)
 		{
+			dirty = false;
 			// calculate bounds in local coordinates
 			bounds.set(vertices[0], vertices[1], 0, 0);
 			var numVertices:Int = vertices.length;
