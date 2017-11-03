@@ -52,7 +52,7 @@ class FlxSubState extends FlxState
 		{
 			for (camera in cameras)
 			{
-				camera.fill(bgColor);
+				camera.fill(bgColor, true, bgColor.alphaFloat);
 			}
 		}
 		else
