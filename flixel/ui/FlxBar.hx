@@ -321,7 +321,7 @@ class FlxBar extends FlxSprite
 	public function createFilledBar(empty:FlxColor, fill:FlxColor, showBorder:Bool = false, border:FlxColor = FlxColor.WHITE):FlxBar
 	{
 		createColoredEmptyBar(empty, showBorder, border);
-		createColoredFilledBar(fill, showBorder, border);
+		createColoredFilledBar(fill, showBorder, FlxColor.TRANSPARENT);
 		return this;
 	}
 	

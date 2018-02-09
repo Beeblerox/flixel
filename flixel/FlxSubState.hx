@@ -51,7 +51,7 @@ class FlxSubState extends FlxState
 	{
 		//Draw background
 		for (camera in cameras)
-			camera.fill(bgColor);
+			camera.fill(bgColor, true, bgColor.alphaFloat);
 		
 		//Now draw all children
 		super.draw();
