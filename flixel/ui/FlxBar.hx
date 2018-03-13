@@ -831,19 +831,16 @@ class FlxBar extends FlxSprite
 		
 		getScreenPosition(_point, Camera).subtractPoint(offset);
 		
-		_frontFrame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, flipX, flipY);
-		_matrix.translate( -origin.x, -origin.y);
-		_matrix.scale(scale.x, scale.y);
+		var tempFrame = _frame;
+		var tempFramePixels = framePixels;
 		
-		if (angle != 0)
-			_matrix.rotateWithTrig(_cosAngle, _sinAngle);
+		framePixels = null;
+		_frame = _frontFrame;
 		
-		_point.add(origin.x, origin.y);
-		if (isPixelPerfectRender(Camera))
-			_point.floor();
+		drawComplex(Camera);
 		
-		_matrix.translate(_point.x, _point.y);
-		Camera.drawPixels(_frontFrame, material, _matrix, colorTransform);
+		_frame = tempFrame;
+		framePixels = tempFramePixels;
 	}
 	
 	override private function set_pixels(Pixels:BitmapData):BitmapData
